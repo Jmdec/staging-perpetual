@@ -15,36 +15,35 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://pamplonatres-laspinas.vercel.app/"),
   
   title: {
-    default: "Perpetual Village | Las Piñas City Official Portal",
-    template: "%s | Perpetual Village"
+    default: "Tau Gamma Phi | Perpetual Village Chapter Official Portal",
+    template: "%s | Tau Gamma Phi"
   },
   
-  description: "Official digital platform of Perpetual Village, Las Piñas City. Access barangay services, community updates, announcements, and connect with your local government. Serving 18,500+ residents with excellence.",
+  description: "Official digital platform of Tau Gamma Phi - Perpetual Village Chapter, Las Piñas City. Connect with the brotherhood, access chapter updates, events, and member resources. Triskelion pride and service.",
   
   keywords: [
-    "Perpetual Village",
-    "Perpetual Village",
+    "Tau Gamma Phi",
+    "Tau Gamma",
+    "Triskelion",
+    "Perpetual Village Chapter",
     "Las Piñas City",
-    "Metro Manila barangay",
-    "barangay services",
-    "barangay clearance",
-    "Las Piñas government",
-    "community services",
-    "barangay announcements",
-    "local government unit",
-    "LGU Philippines",
-    "Perpetual Village Las Piñas",
-    "barangay hall",
-    "community portal",
-    "Philippine barangay",
-    "NCR barangay services"
+    "Metro Manila fraternity",
+    "brotherhood",
+    "TGP",
+    "Tau Gamma Phi Las Piñas",
+    "fraternity chapter",
+    "Triskelion brotherhood",
+    "Philippine fraternity",
+    "NCR chapter",
+    "community service",
+    "brotherhood organization"
   ],
   
-  authors: [{ name: "Perpetual Village" }],
-  creator: "Perpetual Village",
-  publisher: "Perpetual Village, Las Piñas City",
+  authors: [{ name: "Tau Gamma Phi - Perpetual Village Chapter" }],
+  creator: "Tau Gamma Phi - Perpetual Village Chapter",
+  publisher: "Tau Gamma Phi, Perpetual Village Chapter, Las Piñas City",
   generator: "Next.js",
-  applicationName: "Perpetual Village Portal",
+  applicationName: "Tau Gamma Phi Portal",
   referrer: "origin-when-cross-origin",
   manifest: "/manifest.json",
   
@@ -53,15 +52,15 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_PH",
     url: "https://pamplonatres-laspinas.vercel.app/",
-    title: "Perpetual Village | Las Piñas City Official Portal",
-    description: "Official digital platform of Perpetual Village, Las Piñas City. Access barangay services, community updates, and connect with your local government.",
-    siteName: "Perpetual Village",
+    title: "Tau Gamma Phi | Perpetual Village Chapter Official Portal",
+    description: "Official digital platform of Tau Gamma Phi - Perpetual Village Chapter, Las Piñas City. Connect with the brotherhood and stay updated on chapter events.",
+    siteName: "Tau Gamma Phi - Perpetual Village",
     images: [
       {
         url: "https://pamplonatres-laspinas.vercel.app/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Perpetual Village - Las Piñas City Official Portal",
+        alt: "Tau Gamma Phi - Perpetual Village Chapter Official Portal",
       },
     ],
     countryName: "Philippines",
@@ -70,17 +69,17 @@ export const metadata: Metadata = {
   // Twitter Card metadata
   twitter: {
     card: "summary_large_image",
-    title: "Perpetual Village | Las Piñas City Official Portal",
-    description: "Official digital platform of Perpetual Village, Las Piñas City. Access barangay services, community updates, and local government resources.",
+    title: "Tau Gamma Phi | Perpetual Village Chapter Official Portal",
+    description: "Official digital platform of Tau Gamma Phi - Perpetual Village Chapter, Las Piñas City. Brotherhood updates, events, and member resources.",
     images: ["https://pamplonatres-laspinas.vercel.app/twitter-image.png"],
-    creator: "@PamplonaTresLP",
+    creator: "@TGPPerpetualLP",
   },
 
   // Apple Web App
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Brgy Perpetual Village",
+    title: "TGP Perpetual Village",
     startupImage: [
       {
         url: "/apple-splash-2048-2732.png",
@@ -150,7 +149,7 @@ export const metadata: Metadata = {
     },
   },
   
-  category: "government",
+  category: "organization",
   
   // Additional metadata
   other: {
@@ -177,19 +176,19 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  // Government Organization Schema
-  const governmentSchema = {
+  // Organization Schema
+  const organizationSchema = {
     "@context": "https://schema.org",
-    "@type": "GovernmentOrganization",
+    "@type": "Organization",
     "@id": "https://pamplonatres-laspinas.vercel.app/#organization",
-    "name": "Perpetual Village",
-    "alternateName": "Brgy. Perpetual Village",
+    "name": "Tau Gamma Phi - Perpetual Village Chapter",
+    "alternateName": "TGP Perpetual Village",
     "url": "https://pamplonatres-laspinas.vercel.app/",
     "logo": "https://pamplonatres-laspinas.vercel.app/icon512_rounded.png",
-    "description": "Official barangay government of Perpetual Village, Las Piñas City, Metro Manila. Serving 18,500+ residents with quality community services and transparent governance.",
+    "description": "Official chapter of Tau Gamma Phi fraternity in Perpetual Village, Las Piñas City, Metro Manila. A brotherhood dedicated to service, excellence, and camaraderie.",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Perpetual Village Hall",
+      "streetAddress": "Perpetual Village",
       "addressLocality": "Las Piñas City",
       "addressRegion": "Metro Manila",
       "postalCode": "1747",
@@ -205,25 +204,24 @@ export default function RootLayout({
       "@type": "Place",
       "name": "Perpetual Village, Las Piñas City"
     },
-    "parentOrganization": {
-      "@type": "GovernmentOrganization",
-      "name": "City Government of Las Piñas",
-      "url": "https://laspinascity.gov.ph"
+    "memberOf": {
+      "@type": "Organization",
+      "name": "Tau Gamma Phi International",
+      "url": "https://taugammaphi.org"
     },
     "sameAs": [
-      "https://www.facebook.com/BrgyPamplonaTres",
-      "https://twitter.com/PamplonaTresLP"
+      "https://www.facebook.com/TGPPerpetualVillage",
+      "https://twitter.com/TGPPerpetualLP"
     ]
   }
 
   // LocalBusiness Schema for better local SEO
   const localBusinessSchema = {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    "@id": "https://pamplonatres-laspinas.vercel.app/#localbusiness",
-    "name": "Perpetual Village Hall",
+    "@type": "CivicStructure",
+    "@id": "https://pamplonatres-laspinas.vercel.app/#location",
+    "name": "Tau Gamma Phi - Perpetual Village Chapter House",
     "image": "https://pamplonatres-laspinas.vercel.app/og-image.png",
-    "priceRange": "Free",
     "address": {
       "@type": "PostalAddress",
       "streetAddress": "Perpetual Village",
@@ -238,21 +236,7 @@ export default function RootLayout({
       "longitude": "120.9845"
     },
     "url": "https://pamplonatres-laspinas.vercel.app/",
-    "telephone": "+63-2-XXXX-XXXX",
-    "openingHoursSpecification": [
-      {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday"
-        ],
-        "opens": "08:00",
-        "closes": "17:00"
-      }
-    ]
+    "telephone": "+63-2-XXXX-XXXX"
   }
 
   // WebSite Schema
@@ -261,8 +245,8 @@ export default function RootLayout({
     "@type": "WebSite",
     "@id": "https://pamplonatres-laspinas.vercel.app/#website",
     "url": "https://pamplonatres-laspinas.vercel.app/",
-    "name": "Perpetual Village Portal",
-    "description": "Official Portal of Perpetual Village, Las Piñas City",
+    "name": "Tau Gamma Phi - Perpetual Village Portal",
+    "description": "Official Portal of Tau Gamma Phi - Perpetual Village Chapter, Las Piñas City",
     "inLanguage": "en-PH",
     "publisher": {
       "@id": "https://pamplonatres-laspinas.vercel.app/#organization"
@@ -297,7 +281,7 @@ export default function RootLayout({
       {
         "@type": "ListItem",
         "position": 3,
-        "name": "Perpetual Village",
+        "name": "Tau Gamma Phi - Perpetual Village",
         "item": "https://pamplonatres-laspinas.vercel.app/"
       }
     ]
@@ -309,10 +293,10 @@ export default function RootLayout({
         {/* Primary Structured Data */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(governmentSchema) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
         
-        {/* LocalBusiness Schema */}
+        {/* Location Schema */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
@@ -336,11 +320,11 @@ export default function RootLayout({
         <meta property="og:image:type" content="image/png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content="Perpetual Village - Las Piñas City" />
+        <meta property="og:image:alt" content="Tau Gamma Phi - Perpetual Village Chapter" />
         
         {/* Twitter Card Image */}
         <meta name="twitter:image" content="https://pamplonatres-laspinas.vercel.app/twitter-image.png" />
-        <meta name="twitter:image:alt" content="Perpetual Village Portal" />
+        <meta name="twitter:image:alt" content="Tau Gamma Phi Portal" />
         
         {/* Preconnect to external domains */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -363,7 +347,7 @@ export default function RootLayout({
         <meta name="HandheldFriendly" content="True" />
         <meta name="MobileOptimized" content="320" />
         
-        {/* Business-specific meta */}
+        {/* Location meta */}
         <meta property="place:location:latitude" content="14.4611" />
         <meta property="place:location:longitude" content="120.9845" />
         <meta name="coverage" content="Perpetual Village, Las Piñas City, Metro Manila, Philippines" />

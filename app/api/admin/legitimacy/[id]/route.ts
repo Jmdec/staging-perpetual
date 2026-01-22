@@ -1,13 +1,23 @@
 import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || "http://localhost:8000/api"
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.API_URL ||
+  "http://localhost:8000/api"
+
+type RouteContext = {
+  params: Promise<{
+    id: string
+  }>
+}
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   try {
+    const { id } = await context.params
     const cookieStore = await cookies()
     const authToken = cookieStore.get("auth_token")
 
@@ -20,56 +30,40 @@ export async function PUT(
 
     const formData = await request.formData()
 
-    const response = await fetch(`${API_URL}/admin/legitimacy/${params.id}`, {
-      method: "POST", // Laravel uses POST with _method for PUT
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${authToken.value}`,
-        "X-Requested-With": "XMLHttpRequest",
-      },
-      credentials: "include",
-      body: (() => {
-        const newFormData = new FormData()
-        // Add _method field for Laravel
-        newFormData.append("_method", "PUT")
-        
-        // Copy all fields from original formData
-        for (const [key, value] of formData.entries()) {
-          newFormData.append(key, value)
-        }
-        
-        return newFormData
-      })(),
-    })
+    const newFormData = new FormData()
+    newFormData.append("_method", "PUT")
+
+    for (const [key, value] of formData.entries()) {
+      newFormData.append(key, value)
+    }
+
+    const response = await fetch(
+      `${API_URL}/admin/legitimacy/${id}`,
+      {
+        method: "POST", // Laravel spoofing
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${authToken.value}`,
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        body: newFormData,
+      }
+    )
 
     const contentType = response.headers.get("content-type")
-    let data
+    const data = contentType?.includes("application/json")
+      ? await response.json()
+      : null
 
-    if (contentType?.includes("application/json")) {
-      data = await response.json()
-    } else {
-      const text = await response.text()
-      console.error("Non-JSON response from Laravel:", text)
+    if (!data) {
       return NextResponse.json(
         { success: false, message: "Invalid response from server" },
         { status: 500 }
       )
     }
 
-    if (!response.ok) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: data.message || "Failed to update legitimacy request",
-          errors: data.errors,
-        },
-        { status: response.status }
-      )
-    }
-
-    return NextResponse.json(data, { status: 200 })
+    return NextResponse.json(data, { status: response.status })
   } catch (error) {
-    console.error("Error updating legitimacy request:", error)
     return NextResponse.json(
       {
         success: false,
@@ -82,10 +76,11 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  context: RouteContext
 ) {
   try {
+    const { id } = await context.params
     const cookieStore = await cookies()
     const authToken = cookieStore.get("auth_token")
 
@@ -96,33 +91,21 @@ export async function DELETE(
       )
     }
 
-    const response = await fetch(`${API_URL}/admin/legitimacy/${params.id}`, {
-      method: "DELETE",
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${authToken.value}`,
-        "X-Requested-With": "XMLHttpRequest",
-      },
-      credentials: "include",
-    })
+    const response = await fetch(
+      `${API_URL}/admin/legitimacy/${id}`,
+      {
+        method: "DELETE",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${authToken.value}`,
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      }
+    )
 
-    const contentType = response.headers.get("content-type")
-    let data
-
-    if (contentType?.includes("application/json")) {
-      data = await response.json()
-    } else {
-      const text = await response.text()
-      console.error("Non-JSON response from Laravel:", text)
-      return NextResponse.json(
-        { success: false, message: "Invalid response from server" },
-        { status: 500 }
-      )
-    }
-
+    const data = await response.json()
     return NextResponse.json(data, { status: response.status })
   } catch (error) {
-    console.error("Error deleting legitimacy request:", error)
     return NextResponse.json(
       {
         success: false,

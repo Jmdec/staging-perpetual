@@ -295,21 +295,7 @@ export default function EnhancedAdminDashboard() {
     <AdminLayout>
       <div className="h-full overflow-auto bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-10">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
-            <p className="text-sm text-gray-600 mt-1">Comprehensive overview of system performance</p>
-          </div>
-          <button 
-            onClick={fetchDashboardData}
-            className="px-4 py-2 bg-[#eda909b0] text-white rounded-lg hover:bg-yellow-500/90 transition-colors flex items-center gap-2"
-          >
-            <Activity className="w-4 h-4" />
-            Refresh Data
-          </button>
-        </div>
-      </header>
+     
 
       <main className="px-6 py-6">
         <div className="max-w-7xl mx-auto space-y-6">

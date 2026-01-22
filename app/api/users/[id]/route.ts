@@ -6,9 +6,10 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 // PUT - Update business partner
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params
     const cookieStore = await cookies()
     const token = cookieStore.get("auth_token")?.value
 
@@ -17,7 +18,6 @@ export async function PUT(
     }
 
     const formData = await req.formData()
-    const id = params.id
 
     console.log("Updating business at:", `${API_URL}/business-partners/${id}`)
 
@@ -71,17 +71,16 @@ export async function PUT(
 // DELETE - Delete business partner
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params
     const cookieStore = await cookies()
     const token = cookieStore.get("auth_token")?.value
 
     if (!token) {
       return NextResponse.json({ success: false, message: "Authentication required" }, { status: 401 })
     }
-
-    const id = params.id
 
     console.log("Deleting business at:", `${API_URL}/business-partners/${id}`)
 

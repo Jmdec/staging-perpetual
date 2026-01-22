@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Filter, Eye, Edit, Trash2, ChevronRight, ChevronLeft, Printer } from "lucide-react"
+import { Search, Filter, Eye, Edit, Trash2, ChevronRight, ChevronLeft, Printer, Loader2 } from "lucide-react"
 import AdminLayout from "@/components/adminLayout"
 import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/components/ui/use-toast"
@@ -53,6 +53,7 @@ export default function AdminLegitimacyPage() {
   const [deleteTarget, setDeleteTarget] = useState<LegitimacyRequest | null>(null)
   const [applications, setApplications] = useState<LegitimacyRequest[]>([])
   const [isViewOpen, setIsViewOpen] = useState(false)
+  const [printingId, setPrintingId] = useState<number | null>(null)
   const [pagination, setPagination] = useState<PaginationData>({
     current_page: 1,
     last_page: 1,
@@ -131,6 +132,8 @@ export default function AdminLegitimacyPage() {
 
   const handlePrint = async (app: LegitimacyRequest) => {
     try {
+      setPrintingId(app.id)
+      
       const response = await fetch(`/api/admin/legitimacy/${app.id}/pdf`, {
         credentials: "include",
       })
@@ -165,6 +168,8 @@ export default function AdminLegitimacyPage() {
         title: "Error",
         description: "Failed to download certificate",
       })
+    } finally {
+      setPrintingId(null)
     }
   }
 
@@ -315,10 +320,15 @@ export default function AdminLegitimacyPage() {
                           </button>
                           <button
                             onClick={() => handlePrint(app)}
-                            className="text-purple-600 p-1.5 rounded hover:bg-purple-50 transition-colors"
+                            disabled={printingId === app.id}
+                            className="text-purple-600 p-1.5 rounded hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed relative"
                             title="Print certificate"
                           >
-                            <Printer className="w-4 h-4" />
+                            {printingId === app.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Printer className="w-4 h-4" />
+                            )}
                           </button>
                           <button
                             onClick={() => openEditModal(app)}

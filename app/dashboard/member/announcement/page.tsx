@@ -64,7 +64,7 @@ export default function NewsPage() {
               month: "short",
               day: "numeric",
             })
-          : undefined,
+          : "Date not available",
       views: Math.floor(Math.random() * 1000),
       author: article.author?.name || "Admin",
     }
@@ -179,7 +179,7 @@ export default function NewsPage() {
                       setSelectedArticle(article)
                       setModalOpen(true)
                     }}
-                    className="group block bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-lg hover:border-gray-300 transition-all duration-300"
+                    className="group block bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-lg hover:border-gray-300 transition-all duration-300 cursor-pointer"
                   >
                     {article.image && (
                       <div className="relative aspect-video bg-linear-to-br from-emerald-100 to-orange-100 overflow-hidden">
@@ -218,7 +218,7 @@ export default function NewsPage() {
                           </span>
                           <button
                             onClick={(e) => {
-                              e.preventDefault()
+                              e.stopPropagation()
                               // Share functionality
                             }}
                             className="flex items-center gap-1 hover:text-emerald-600 transition-colors"
@@ -227,7 +227,7 @@ export default function NewsPage() {
                           </button>
                           <button
                             onClick={(e) => {
-                              e.preventDefault()
+                              e.stopPropagation()
                               // Bookmark functionality
                             }}
                             className="flex items-center gap-1 hover:text-orange-600 transition-colors"

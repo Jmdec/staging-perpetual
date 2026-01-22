@@ -259,21 +259,7 @@ export default function AdminContactMessagesPage() {
     <AdminLayout>
       <div className="h-full overflow-auto bg-gray-50">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 sticky top-0 z-10">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
-                <Mail className="w-6 h-6 text-emerald-600" />
-                Contact Messages
-              </h1>
-              <p className="text-xs sm:text-sm text-gray-600 mt-1">Manage and respond to contact inquiries</p>
-            </div>
-            <div className="hidden sm:flex items-center gap-2 text-sm text-gray-600">
-              <MessageSquare className="w-5 h-5 text-emerald-600" />
-              <span className="font-medium">{pagination.total} Total</span>
-            </div>
-          </div>
-        </header>
+        
 
         {/* Main Content */}
         <main className="px-4 sm:px-6 py-4 sm:py-6">
