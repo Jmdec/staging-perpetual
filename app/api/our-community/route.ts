@@ -15,20 +15,23 @@ export async function GET(request: NextRequest) {
 
     const token = await getAuthToken()
 
-    if (!token) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      )
+    // Use public endpoint for unauthenticated requests, admin endpoint for authenticated
+    const endpoint = token ? `${API_URL}/our-community/show` : `${API_URL}/our-community`
+    
+    console.log("[Community API] GET - Fetching from:", endpoint)
+
+    const headers: any = {
+      Accept: "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    }
+    
+    if (token) {
+      headers.Authorization = `Bearer ${token}`
     }
 
-    const response = await fetch(`${API_URL}/our-community`, {
+    const response = await fetch(endpoint, {
       method: "GET",
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${token}`,
-        "X-Requested-With": "XMLHttpRequest",
-      },
+      headers,
     })
 
     const responseText = await response.text()

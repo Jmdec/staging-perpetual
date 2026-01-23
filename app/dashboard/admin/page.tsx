@@ -31,8 +31,6 @@ import {
 } from "recharts"
 import AdminLayout from "@/components/adminLayout"
 
-/* ================= TYPES ================= */
-
 interface DashboardStats {
   totalUsers: number
   activeUsers: number
@@ -66,8 +64,6 @@ interface Announcement {
   created_at: string
 }
 
-/* ================= COMPONENT ================= */
-
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
 
@@ -78,8 +74,6 @@ export default function AdminDashboard() {
     pendingApprovals: 0,
   })
 
-  /* ===== REAL CHART STATES ===== */
-
   const [certificateChart, setCertificateChart] = useState<any[]>([])
   const [userStatusChart, setUserStatusChart] = useState<any[]>([])
   const [newsPieChart, setNewsPieChart] = useState<any[]>([])
@@ -89,8 +83,6 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchDashboardData()
   }, [])
-
-  /* ================= FETCH REAL DATA ================= */
 
   const fetchDashboardData = async () => {
     try {

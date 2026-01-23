@@ -2,6 +2,9 @@
 
 import React, { useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
+
+import { authClient } from '@/lib/auth';
+import { useToast } from '@/components/ui/use-toast';
 import {
   Bell,
   LogOut,
@@ -17,6 +20,7 @@ import {
 export default function MemberHeader() {
   const router = useRouter()
   const pathname = usePathname()
+  const { toast } = useToast();
   const [menuOpen, setMenuOpen] = useState(false)
 
   const navigationItems = [
@@ -27,11 +31,31 @@ export default function MemberHeader() {
     { icon: BadgeCheck, label: "Certificate of Legitimacy", path: "/dashboard/member/legitimacy" },
   ]
 
-  const handleLogout = () => {
-    localStorage.removeItem("auth_token")
-    localStorage.removeItem("user")
-    router.push("/login")
-  }
+  const handleLogout = async () => {
+      try {
+        await authClient.logout();
+        
+        toast({
+          title: "✓ Logged Out Successfully",
+          description: "You have been securely logged out.",
+          className: "bg-green-50 border-green-200",
+          duration: 2000,
+        });
+  
+        setTimeout(() => {
+          router.push('/login');
+        }, 500);
+        
+      } catch (error) {
+        console.error('Logout error:', error);
+        
+        toast({
+          variant: "destructive",
+          title: "Logout Failed",
+          description: "An error occurred. Please try again.",
+        });
+      }
+    };
 
   const handleNavigate = (path: string) => {
     router.push(path)
@@ -56,7 +80,7 @@ export default function MemberHeader() {
                   />
                   <div>
                     <h1 className="font-bold text-sm">Perpetual Help College</h1>
-                    <p className="text-xs text-gray-500">Admin Dashboard</p>
+                    <p className="text-xs text-gray-500">Member Dashboard</p>
                   </div>
                 </div>
       

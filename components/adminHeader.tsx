@@ -2,6 +2,8 @@
 
 import React, { useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
+import { authClient } from '@/lib/auth';
+import { useToast } from '@/components/ui/use-toast';
 import {
   LayoutDashboard,
   Newspaper,
@@ -22,6 +24,8 @@ import {
 export default function AdminHeader() {
   const router = useRouter()
   const pathname = usePathname()
+  const { toast } = useToast();
+
 
   const [menuOpen, setMenuOpen] = useState(false)
   const [customizationOpen, setCustomizationOpen] = useState(false)
@@ -49,11 +53,31 @@ export default function AdminHeader() {
     setCustomizationOpen(false)
   }
 
-  const handleLogout = () => {
-    localStorage.removeItem("auth_token")
-    localStorage.removeItem("user")
-    router.push("/login")
-  }
+  const handleLogout = async () => {
+    try {
+      await authClient.logout();
+
+      toast({
+        title: "✓ Logged Out Successfully",
+        description: "You have been securely logged out.",
+        className: "bg-green-50 border-green-200",
+        duration: 2000,
+      });
+
+      setTimeout(() => {
+        router.push('/login');
+      }, 500);
+
+    } catch (error) {
+      console.error('Logout error:', error);
+
+      toast({
+        variant: "destructive",
+        title: "Logout Failed",
+        description: "An error occurred. Please try again.",
+      });
+    }
+  };
 
   const isActive = (path: string) =>
     pathname === path || pathname.startsWith(path + "/")
@@ -101,9 +125,8 @@ export default function AdminHeader() {
 
       {/* Hamburger Menu */}
       <div
-        className={`fixed top-0 left-0 right-0 z-50 bg-white shadow-xl transition-transform duration-300 ${
-          menuOpen ? "translate-y-0" : "-translate-y-full"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 bg-white shadow-xl transition-transform duration-300 ${menuOpen ? "translate-y-0" : "-translate-y-full"
+          }`}
       >
         {/* Menu Header */}
         <div className="flex items-center justify-between px-4 py-4 border-b">
@@ -120,11 +143,10 @@ export default function AdminHeader() {
             <button
               key={index}
               onClick={() => handleNavigate(item.path)}
-              className={`w-full flex items-center gap-4 px-5 py-3 text-left transition-colors ${
-                isActive(item.path)
+              className={`w-full flex items-center gap-4 px-5 py-3 text-left transition-colors ${isActive(item.path)
                   ? "bg-orange-50 text-orange-600 font-semibold"
                   : "text-gray-700 hover:bg-gray-100"
-              }`}
+                }`}
             >
               <item.icon size={20} />
               <span>{item.label}</span>
@@ -134,11 +156,10 @@ export default function AdminHeader() {
           {/* Customization Section */}
           <button
             onClick={() => setCustomizationOpen(prev => !prev)}
-            className={`w-full flex items-center justify-between px-5 py-3 text-left transition-colors ${
-              isCustomizationActive
+            className={`w-full flex items-center justify-between px-5 py-3 text-left transition-colors ${isCustomizationActive
                 ? "bg-orange-50 text-orange-600 font-semibold"
                 : "text-gray-700 hover:bg-gray-100"
-            }`}
+              }`}
           >
             <div className="flex items-center gap-4">
               <FileText size={20} />
@@ -153,11 +174,10 @@ export default function AdminHeader() {
                 <button
                   key={index}
                   onClick={() => handleNavigate(item.path)}
-                  className={`w-full flex items-center gap-3 px-5 py-2 text-left text-sm transition-colors ${
-                    isActive(item.path)
+                  className={`w-full flex items-center gap-3 px-5 py-2 text-left text-sm transition-colors ${isActive(item.path)
                       ? "text-orange-600 font-semibold"
                       : "text-gray-600 hover:text-gray-900"
-                  }`}
+                    }`}
                 >
                   <item.icon size={16} />
                   <span>{item.label}</span>

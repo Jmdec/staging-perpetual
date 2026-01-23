@@ -1,26 +1,22 @@
 "use client"
 import { useState, useEffect } from "react"
 import {
-  Search,
-  Filter,
-  Eye,
   Plus,
-  Edit,
   Trash2,
-  ChevronLeft,
-  ChevronRight,
-  Newspaper,
-  User,
-  X,
-  Calendar,
-  Upload,
-  AlertCircle,
-  Save,
   Building2,
   Hash,
-  Tag, Users, Home, Leaf, Award, ZoomIn, Target, Globe
+  Tag,
+  Save,
+  AlertCircle,
+  RefreshCw,
+  User,
+  Newspaper,
+  Calendar,
+  Home,
+  Award,
+  Leaf,
+  Eye
 } from "lucide-react"
-import AdminLayout from "@/components/adminLayout"
 
 type CommunityItem = {
   id: number;
@@ -34,6 +30,7 @@ export default function AdminCommunityPage() {
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isEdit, setIsEdit] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const [formData, setFormData] = useState({
     community_header: "",
@@ -58,6 +55,7 @@ export default function AdminCommunityPage() {
   const fetchCommunityData = async () => {
     try {
       setLoading(true)
+      setError(null)
       const response = await fetch("/api/our-community")
 
       if (response.ok) {
@@ -71,10 +69,50 @@ export default function AdminCommunityPage() {
           })
 
           // Handle array fields from database
-          const lists = data.data.community_list || []
-          const icons = data.data.community_card_icon || []
-          const numbers = data.data.community_card_number || []
-          const categories = data.data.community_card_category || []
+          let lists = data.data.community_list || []
+          let icons = data.data.community_card_icon || []
+          let numbers = data.data.community_card_number || []
+          let categories = data.data.community_card_category || []
+
+          // Parse if they come as JSON strings
+          if (typeof lists === 'string') {
+            try {
+              lists = JSON.parse(lists)
+            } catch (e) {
+              console.error("Error parsing lists:", e)
+              lists = []
+            }
+          }
+          if (typeof icons === 'string') {
+            try {
+              icons = JSON.parse(icons)
+            } catch (e) {
+              console.error("Error parsing icons:", e)
+              icons = []
+            }
+          }
+          if (typeof numbers === 'string') {
+            try {
+              numbers = JSON.parse(numbers)
+            } catch (e) {
+              console.error("Error parsing numbers:", e)
+              numbers = []
+            }
+          }
+          if (typeof categories === 'string') {
+            try {
+              categories = JSON.parse(categories)
+            } catch (e) {
+              console.error("Error parsing categories:", e)
+              categories = []
+            }
+          }
+
+          // Ensure they're arrays
+          if (!Array.isArray(lists)) lists = []
+          if (!Array.isArray(icons)) icons = []
+          if (!Array.isArray(numbers)) numbers = []
+          if (!Array.isArray(categories)) categories = []
 
           // Find the maximum length to handle all items
           const maxLength = Math.max(
@@ -95,10 +133,23 @@ export default function AdminCommunityPage() {
           }))
 
           setCommunityList(items)
+        } else {
+          setIsEdit(false)
         }
+      } else if (response.status === 404) {
+        setIsEdit(false)
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || "Failed to fetch community data")
       }
     } catch (error) {
       console.error("Error fetching community data:", error)
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to connect to server"
+      )
+      setIsEdit(false)
     } finally {
       setLoading(false)
     }
@@ -138,11 +189,12 @@ export default function AdminCommunityPage() {
         !formData.community_title ||
         !formData.community_content
       ) {
-        alert("Please fill in all required fields")
+        setError("Please fill in all required fields")
         return
       }
 
       setIsSubmitting(true)
+      setError(null)
 
       const method = isEdit ? "PUT" : "POST"
 
@@ -176,19 +228,23 @@ export default function AdminCommunityPage() {
         data = JSON.parse(text)
         console.log("Parsed JSON:", data)
       } catch {
-        alert("Invalid server response")
+        setError("Invalid server response")
         return
       }
 
       if (response.ok && data.success) {
+        setError(null)
         alert(`Community ${isEdit ? "updated" : "created"} successfully`)
         fetchCommunityData()
       } else {
+        setError(data.message || "Failed to save community")
         alert(data.message || "Failed to save community")
       }
     } catch (error) {
       console.error("Submit error:", error)
-      alert("Failed to save community")
+      const errorMessage = error instanceof Error ? error.message : "Failed to save community"
+      setError(errorMessage)
+      alert(errorMessage)
     } finally {
       setIsSubmitting(false)
     }
@@ -225,6 +281,35 @@ export default function AdminCommunityPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+          {/* Error Alert */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-red-900">Error</h3>
+                <p className="text-sm text-red-700 mt-1">{error}</p>
+              </div>
+              <button
+                onClick={() => setError(null)}
+                className="text-red-600 hover:text-red-800"
+              >
+                ×
+              </button>
+            </div>
+          )}
+
+          {/* Retry Button */}
+          {error && (
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <button
+                onClick={fetchCommunityData}
+                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Retry Loading Data
+              </button>
+            </div>
+          )}
           {/* Main Information Card */}
           <div className="bg-white rounded-lg border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Community Information</h2>
