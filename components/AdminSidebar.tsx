@@ -13,16 +13,12 @@ import {
   Megaphone,
   ChevronLeft,
   ChevronRight,
-<<<<<<< HEAD
-=======
   Handshake,
   Images,
   Settings,
   Menu,
   X,
-  Camera,
   Video,
->>>>>>> 5364289390ab283843186110486f8605c83aadb5
 } from "lucide-react";
 import { authClient } from "@/lib/auth";
 import { useToast } from "@/components/ui/use-toast";
@@ -86,31 +82,15 @@ export default function AdminSidebar({
     { icon: Megaphone, label: "Announcements", path: "/dashboard/admin/announcements" },
     { icon: Mail, label: "Contact Messages", path: "/dashboard/admin/contact" },
     { icon: FileText, label: "Legitimacy", path: "/dashboard/admin/legitimacy" },
-<<<<<<< HEAD
     { icon: FileText, label: "About", path: "/dashboard/admin/about" },
     { icon: FileText, label: "Office", path: "/dashboard/admin/office-contact" },
     { icon: Camera, label: "Vlogs", path: "/dashboard/admin/vlogs" },
     { icon: User, label: "Business Partners", path: "/dashboard/admin/business-partners" },
     { icon: User, label: "Users", path: "/dashboard/admin/users" },
-  ];
 
-=======
-   
-    { icon: User, label: "Users", path: "/dashboard/admin/users" },
-  ];
+    { icon: Images, label: "Gallery", path: "/dashboard/admin/gallery" },
+    { icon: Video, label: "Vlogs", path: "/dashboard/admin/vlogs" },];
 
-  const customization = [
-    { icon: FileText, label: "About Us", path: "/dashboard/admin/about-us" },
-    { icon: FileText, label: "Contact Information", path: "/dashboard/admin/office-contact" },
-    { icon: Handshake, label: "Partnerships", path: "/dashboard/admin/partners" },
-    { icon: Images, label: "Gallery", path: "/dashboard/admin/gallery" }, 
-    { icon: Video, label: "Vlogs", path: "/dashboard/admin/vlogs" },
-  ];
-
-  const isaboutUsActive =
-    expandedSections.aboutUs || isSectionActive(customization);
-
->>>>>>> 5364289390ab283843186110486f8605c83aadb5
   return (
     <aside
       className={`hidden lg:block fixed top-0 left-0 h-full overflow-visible 
@@ -127,9 +107,8 @@ export default function AdminSidebar({
 
       {/* Scrollable Content */}
       <div
-        className={`h-full overflow-y-auto overflow-x-hidden ${
-          isCollapsed ? "py-8 px-4" : "py-8 px-8"
-        } flex flex-col min-h-full`}
+        className={`h-full overflow-y-auto overflow-x-hidden ${isCollapsed ? "py-8 px-4" : "py-8 px-8"
+          } flex flex-col min-h-full`}
         style={{
           scrollbarWidth: "thin",
           scrollbarColor: "#eda909b0 #992f2f",
@@ -137,9 +116,8 @@ export default function AdminSidebar({
       >
         {/* Logo Section */}
         <div
-          className={`flex items-center gap-2 mb-4 py-3 ${
-            isCollapsed ? "justify-center" : ""
-          }`}
+          className={`flex items-center gap-2 mb-4 py-3 ${isCollapsed ? "justify-center" : ""
+            }`}
         >
           <div
             className="w-10 h-10 rounded-full
@@ -149,80 +127,72 @@ export default function AdminSidebar({
           >
             <img
               src="/perpetuallogo.jpg"
-<<<<<<< HEAD
-              alt="Perpetual Help"
-              className="w-10 h-10 rounded-full object-cover"
-            />
-          </div>
-
-=======
               alt="Perpetual Village Logo"
               className="w-10 h-10 rounded-full object-cover"
             />
+            
           </div>
->>>>>>> 5364289390ab283843186110486f8605c83aadb5
-          {!isCollapsed && (
-            <div>
-              <h1 className="font-bold text-base">Perpetual Help</h1>
-              <p className="text-xs text-emerald-100">Admin Panel</p>
-            </div>
-          )}
-        </div>
-
-        {/* Main Navigation */}
-        <nav className="space-y-1 flex-1 py-2 border-t border-white/20">
-          {navigationItems.map((item, index) => {
-            const active = isActive(item.path);
-
-            return (
-              <div key={index} className="group">
-                <button
-                  onClick={() => router.push(item.path)}
-                  className={`w-full flex items-center gap-2 px-3 py-3 rounded-lg text-left transition-colors text-sm
-                    ${isCollapsed ? "justify-center" : ""}
-                    ${
-                      active
-                        ? "bg-white/20 font-semibold shadow-lg"
-                        : "hover:bg-white/10"
-                    }`}
-                >
-                  <item.icon size={16} />
-                  {!isCollapsed && <span>{item.label}</span>}
-                </button>
-
-                {/* Collapsed Flyout */}
-                {isCollapsed && (
-                  <div className="absolute left-full w-44 -translate-y-1/2 -m-5 px-3 py-2 -ml-2 bg-emerald-600 text-white text-xs font-semibold rounded-md shadow-xl opacity-0 translate-x-2 invisible pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 group-hover:visible group-hover:pointer-events-auto transition-all duration-200 z-[9999]">
-                    {item.label}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </nav>
-
-        {/* Logout */}
-        <div className="py-6 border-t border-white/20">
-          <button
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            className={`w-full flex items-center gap-2 px-3 py-3 rounded-lg hover:bg-red-500/20 transition-colors text-sm
-              ${isCollapsed ? "justify-center" : ""}`}
-          >
-            {isLoggingOut ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                {!isCollapsed && <span>Logging out...</span>}
-              </>
-            ) : (
-              <>
-                <LogOut size={16} />
-                {!isCollapsed && <span>Logout</span>}
-              </>
-            )}
-          </button>
-        </div>
+        {!isCollapsed && (
+          <div>
+            <h1 className="font-bold text-base">Perpetual Help</h1>
+            <p className="text-xs text-emerald-100">Admin Panel</p>
+          </div>
+        )}
       </div>
-    </aside>
+
+      {/* Main Navigation */}
+      <nav className="space-y-1 flex-1 py-2 border-t border-white/20">
+        {navigationItems.map((item, index) => {
+          const active = isActive(item.path);
+
+          return (
+            <div key={index} className="group">
+              <button
+                onClick={() => router.push(item.path)}
+                className={`w-full flex items-center gap-2 px-3 py-3 rounded-lg text-left transition-colors text-sm
+                    ${isCollapsed ? "justify-center" : ""}
+                    ${active
+                    ? "bg-white/20 font-semibold shadow-lg"
+                    : "hover:bg-white/10"
+                  }`}
+              >
+                <item.icon size={16} />
+                {!isCollapsed && <span>{item.label}</span>}
+              </button>
+
+              {/* Collapsed Flyout */}
+              {isCollapsed && (
+                <div className="absolute left-full w-44 -translate-y-1/2 -m-5 px-3 py-2 -ml-2 bg-emerald-600 text-white text-xs font-semibold rounded-md shadow-xl opacity-0 translate-x-2 invisible pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 group-hover:visible group-hover:pointer-events-auto transition-all duration-200 z-[9999]">
+                  {item.label}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </nav>
+
+      {/* Logout */}
+      <div className="py-6 border-t border-white/20">
+        <button
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className={`w-full flex items-center gap-2 px-3 py-3 rounded-lg hover:bg-red-500/20 transition-colors text-sm
+              ${isCollapsed ? "justify-center" : ""}`}
+        >
+          {isLoggingOut ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              {!isCollapsed && <span>Logging out...</span>}
+            </>
+          ) : (
+            <>
+              <LogOut size={16} />
+              {!isCollapsed && <span>Logout</span>}
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+    </aside >
   );
 }
