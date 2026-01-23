@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 
+/* ===================== POST (UPDATE) ===================== */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
-  const { id } = await params // ✅ WILL EXIST
+  const { id } = context.params
 
   if (!id || id === "undefined") {
     return NextResponse.json(
@@ -13,9 +14,10 @@ export async function POST(
       { status: 400 }
     )
   }
-  const cookieStore = await cookies()
 
+  const cookieStore = cookies()
   const authToken = cookieStore.get("auth_token")
+
   if (!authToken) {
     return NextResponse.json(
       { success: false, message: "Authentication required" },
@@ -24,7 +26,7 @@ export async function POST(
   }
 
   const formData = await request.formData()
-  formData.append("_method", "PUT") // spoofing
+  formData.append("_method", "PUT") // Laravel spoofing
 
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/admin/legitimacy/${id}`,
@@ -40,23 +42,22 @@ export async function POST(
   )
 
   const text = await response.text()
+
   return new NextResponse(text, {
     status: response.status,
     headers: { "Content-Type": "application/json" },
   })
 }
 
-
-
 /* ===================== DELETE ===================== */
 export async function DELETE(
   _request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-): Promise<Response> {
+  context: { params: { id: string } }
+) {
   try {
-    const { id } = await context.params
+    const { id } = context.params
 
-    const cookieStore = await cookies()
+    const cookieStore = cookies()
     const authToken = cookieStore.get("auth_token")
 
     if (!authToken) {
