@@ -4,14 +4,14 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 
-interface AdminDeleteLegitimacyModalProps {
+interface MemberDeleteLegitimacyModalProps {
   isOpen: boolean
   itemName?: string
   onClose: () => void
   onConfirm: () => void
 }
 
-export function AdminDeleteLegitimacyModal({ isOpen, itemName, onClose, onConfirm }: AdminDeleteLegitimacyModalProps) {
+export function MemberDeleteLegitimacyModal({ isOpen, itemName, onClose, onConfirm }: MemberDeleteLegitimacyModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md">

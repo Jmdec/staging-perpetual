@@ -1,14 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Filter, Eye, Edit, Trash2, ChevronRight, ChevronLeft } from "lucide-react"
-import AdminLayout from "@/components/adminLayout"
+import { Search, Filter, Eye, Edit, Trash2, ChevronRight, ChevronLeft, Printer } from "lucide-react"
+import MemberLayout from "@/components/memberLayout"
 import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/components/ui/use-toast"
-import AdminLegitimacyModal from "@/components/admin/legitimacy/add-edit-form"
-import { AdminDeleteLegitimacyModal } from "@/components/admin/legitimacy/delete-form"
-import MemberLayout from "@/components/memberLayout"
 import MemberLegitimacyModal from "@/components/member/legitimacy/add-modal"
+import MemberLegitimacyEditModal from "@/components/member/legitimacy/edit-modal"
+import { MemberDeleteLegitimacyModal } from "@/components/member/legitimacy/delete-form"
 import ViewLegitimacyModal from "@/components/member/legitimacy/view-modal"
 
 interface Signatory {
@@ -58,8 +57,9 @@ export default function LegitimacyPage() {
   const [loading, setLoading] = useState(true)
 
   // Modal states
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedItem, setSelectedItem] = useState<LegitimacyRequest | null>(null)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [isViewOpen, setIsViewOpen] = useState(false)
   const [selectedApplication, setSelectedApplication] = useState<LegitimacyRequest | null>(null)
 
@@ -104,18 +104,102 @@ export default function LegitimacyPage() {
     if (!authLoading && user) fetchLegitimacy()
   }, [authLoading, user, pagination.current_page, statusFilter])
 
-  // Modal handlers
   const openCreateModal = () => {
     setSelectedApplication(null)
-    setIsModalOpen(true)
+    setIsCreateModalOpen(true)
   }
 
-  const handleView = (item: LegitimacyRequest) => {
-    setSelectedItem(item)
+  const openEditModal = (app: LegitimacyRequest) => {
+    setSelectedApplication(app)
+    setIsEditModalOpen(true)
+  }
+
+  const openDeleteModal = (app: LegitimacyRequest) => {
+    setSelectedApplication(app)
+    setIsDeleteOpen(true)
+  }
+
+  const handleView = (app: LegitimacyRequest) => {
+    setSelectedApplication(app)
     setIsViewOpen(true)
   }
 
-  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+  const handlePrint = async (app: LegitimacyRequest) => {
+    if (app.status !== 'approved') {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Only approved certificates can be downloaded",
+      })
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/users/legitimacy/${app.id}/pdf`, {
+        credentials: "include",
+      })
+
+      if (response.ok) {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `certificate-${app.alias}-${new Date().toISOString().split('T')[0]}.pdf`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+
+        toast({
+          title: "Success",
+          description: "Certificate downloaded successfully",
+        })
+      } else {
+        const errorData = await response.json()
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: errorData.message || "Failed to generate certificate",
+        })
+      }
+    } catch (error) {
+      console.error("Error downloading certificate:", error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to download certificate",
+      })
+    }
+  }
+
+  const confirmDelete = async () => {
+    if (!selectedApplication) return
+    try {
+      const res = await fetch(`/api/legitimacy/${selectedApplication.id}`, {
+        method: "DELETE",
+        credentials: "include",
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast({ title: "Success", description: "Application deleted successfully" })
+        fetchLegitimacy()
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: data.message || "Failed to delete application",
+        })
+      }
+    } catch (err) {
+      toast({ variant: "destructive", title: "Error", description: "Failed to delete application" })
+    } finally {
+      setIsDeleteOpen(false)
+      setSelectedApplication(null)
+    }
+  }
+
+  const formatDate = (dateString: string) => 
+    new Date(dateString).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
 
   if (authLoading) {
     return (
@@ -136,9 +220,9 @@ export default function LegitimacyPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Certificate of Legitimacy Applications</h1>
-              <p className="text-sm text-gray-500">Manage all applications</p>
+              <p className="text-sm text-gray-500">Manage your applications</p>
             </div>
-            <button onClick={openCreateModal} className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700">
+            <button onClick={openCreateModal} className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors">
               + New Application
             </button>
           </div>
@@ -217,11 +301,55 @@ export default function LegitimacyPage() {
                           {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">{app.certificate_date ? formatDate(app.certificate_date) : "-"}</td>
-                      <td className="px-6 py-4 text-sm flex gap-2">
-                        <button onClick={() => handleView(app)} className="text-orange-600 p-1.5 rounded hover:bg-orange-50">
-                          <Eye />
-                        </button>
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        {app.certificate_date ? formatDate(app.certificate_date) : "-"}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleView(app)}
+                            className="text-blue-600 p-1.5 rounded hover:bg-blue-50 transition-colors"
+                            title="View details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handlePrint(app)}
+                            disabled={app.status !== 'approved'}
+                            className={`p-1.5 rounded transition-colors ${
+                              app.status === 'approved'
+                                ? 'text-purple-600 hover:bg-purple-50'
+                                : 'text-gray-400 cursor-not-allowed'
+                            }`}
+                            title={app.status === 'approved' ? 'Print certificate' : 'Only approved certificates can be downloaded'}
+                          >
+                            <Printer className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => openEditModal(app)}
+                            disabled={app.status === 'rejected'}
+                            className={`p-1.5 rounded transition-colors ${
+                              app.status === 'rejected'
+                                ? 'text-gray-400 cursor-not-allowed'
+                                : 'text-orange-600 hover:bg-orange-50'
+                            }`}
+                            title={app.status === 'pending' ? 'Edit application' : 'Only pending applications can be edited'}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => openDeleteModal(app)}
+                            disabled={app.status !== 'pending'}
+                            className={`p-1.5 rounded transition-colors ${
+                              app.status === 'rejected'
+                                ? 'text-gray-400 cursor-not-allowed'
+                                : 'text-red-600 hover:bg-red-50'
+                            }`}
+                            title={app.status === 'pending' ? 'Delete application' : 'Only pending applications can be deleted'}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -248,7 +376,7 @@ export default function LegitimacyPage() {
 
                 <div className="flex items-center gap-1">
                   {Array.from({ length: Math.min(5, pagination.last_page) }, (_, i) => {
-                    let pageNum
+                    let pageNum: number
                     if (pagination.last_page <= 5) {
                       pageNum = i + 1
                     } else if (pagination.current_page <= 3) {
@@ -264,7 +392,9 @@ export default function LegitimacyPage() {
                         key={pageNum}
                         onClick={() => setPagination((p) => ({ ...p, current_page: pageNum }))}
                         className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
-                          pagination.current_page === pageNum ? "bg-orange-600 text-white" : "border border-gray-300 hover:bg-gray-50"
+                          pagination.current_page === pageNum 
+                            ? "bg-orange-600 text-white" 
+                            : "border border-gray-300 hover:bg-gray-50"
                         }`}
                       >
                         {pageNum}
@@ -291,14 +421,43 @@ export default function LegitimacyPage() {
         </div>
 
         {/* Modals */}
-        {isModalOpen && <MemberLegitimacyModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmitSuccess={fetchLegitimacy} />}
+        {isCreateModalOpen && (
+          <MemberLegitimacyModal 
+            isOpen={isCreateModalOpen} 
+            onClose={() => setIsCreateModalOpen(false)} 
+            onSubmitSuccess={fetchLegitimacy} 
+          />
+        )}
+        
+        {isEditModalOpen && (
+          <MemberLegitimacyEditModal
+            isOpen={isEditModalOpen}
+            initialData={selectedApplication || undefined}
+            onClose={() => {
+              setIsEditModalOpen(false)
+              setSelectedApplication(null)
+            }}
+            onSubmitSuccess={fetchLegitimacy}
+          />
+        )}
+
         <ViewLegitimacyModal
           isOpen={isViewOpen}
-          selectedItem={selectedItem}
+          selectedItem={selectedApplication}
           onClose={() => {
             setIsViewOpen(false)
-            setSelectedItem(null)
+            setSelectedApplication(null)
           }}
+        />
+
+        <MemberDeleteLegitimacyModal
+          isOpen={isDeleteOpen}
+          itemName={selectedApplication?.alias || "Application"}
+          onClose={() => {
+            setIsDeleteOpen(false)
+            setSelectedApplication(null)
+          }}
+          onConfirm={confirmDelete}
         />
       </div>
     </MemberLayout>

@@ -90,7 +90,7 @@ export async function middleware(request: NextRequest) {
 
     // Default redirect if role check fails
     console.log('Middleware: Role check failed, redirecting to home')
-    return NextResponse.redirect(new URL('/dashboard/member/', request.url))
+    return NextResponse.redirect(new URL('/login', request.url))
   }
 
   // Allow access to all other routes

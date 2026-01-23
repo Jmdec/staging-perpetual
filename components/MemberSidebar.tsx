@@ -108,25 +108,9 @@ export default function MemberSidebar({
     { icon: Home, label: 'Home', path: '/dashboard/member' },
     { icon: Grid3x3, label: 'Partners', path: '/dashboard/member/partners' },
     { icon: Newspaper, label: 'News', path: '/dashboard/member/news' },
-    { icon: User, label: 'Announcemnets', path: '/dashboard/member/account/announcements' },
-    { icon: User, label: 'Certificate of Legitemacy', path: '/dashboard/member/legitimacy' },
+    { icon: User, label: 'Announcemnets', path: '/dashboard/member/announcements' },
+    { icon: User, label: 'Legitemacy', path: '/dashboard/member/legitimacy' },
   ];
-
-  // const quickAccessItems = [
-  //   { icon: FileText, label: 'Member Guide', path: '/dashboard/member/member-guide' },
-  //   { icon: GraduationCap, label: 'Students', path: '/dashboard/member/students' },
-  //   { icon: Rocket, label: 'Startup', path: '/dashboard/member/startup' },
-  //   { icon: MapPin, label: 'City Map', path: '/dashboard/member/city-map' },
-  //   { icon: Bell, label: 'Alerts', path: '/dashboard/member/alerts' },
-  // ];
-
-  const certificateItems = [
-    { icon: File, label: 'Certificates', path: '/dashboard/member/services/certificates' },
-    { icon: File, label: 'Certificate of Legitemacy', path: '/dashboard/member/services/certificate-of-legitemacy' },
-  ];
-
-  // const isQuickAccessActive = expandedSections.quickAccess || isSectionActive(quickAccessItems);
-  const isCertificatesActive = expandedSections.certificates || isSectionActive(certificateItems);
 
   return (
     <aside className={`hidden lg:block fixed top-0 left-0 h-full overflow-visible bg-gradient-to-b from-yellow-600/90 via-red-800/90 to-red-900/90 text-white shadow-2xl z-50 transition-all duration-300 ${isCollapsed ? "w-[70px]" : "w-[300px]"}`}>
@@ -181,73 +165,6 @@ export default function MemberSidebar({
           })}
 
          
-
-          {/* Certificates Section */}
-          <div className="group">
-            {/* MAIN BUTTON */}
-            <button
-              onClick={() => !isCollapsed && toggleSection("certificates")}
-              className={`w-full flex items-center justify-between gap-3 px-3 py-3 rounded-lg text-left transition-colors text-sm hover:bg-white/10 ${isCertificatesActive ? "bg-white/20 font-semibold shadow-lg" : "hover:bg-white/10"} ${isCollapsed ? "justify-center" : ""}`}
-            >
-              <div className="flex items-center gap-2 justify-center">
-                <FileText size={16} />
-                {!isCollapsed && (
-                  <span className={`font-semibold text-white/90 text-xs tracking-wide ${isCertificatesActive ? "text-white font-semibold" : "text-white/90"}`}>
-                    Certificates
-                  </span>
-                )}
-              </div>
-
-              {!isCollapsed && (
-                expandedSections.certificates ? (
-                  <ChevronDown size={16} />
-                ) : (
-                  <ChevronUp size={16} />
-                )
-              )}
-            </button>
-
-            {/* NORMAL EXPANDED MODE */}
-            {!isCollapsed && expandedSections.certificates && (
-              <div className="space-y-1 pl-3 m-1">
-                {certificateItems.map((item, index) => {
-                  const active = isActive(item.path);
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => router.push(item.path)}
-                      className={`w-full flex items-center gap-2 p-3 py-3 rounded-lg text-left transition-colors text-xs ${active ? "bg-white/20 font-semibold shadow-lg" : "hover:bg-white/10"}`}
-                    >
-                      <item.icon size={16} />
-                      <span className="text-xs">{item.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* COLLAPSED MODE FLYOUT */}
-            {isCollapsed && (
-              <div className="absolute left-full -translate-y-1/2 -ml-5 py-2 w-56 bg-emerald-600 rounded-lg shadow-xl opacity-0 translate-x-2 invisible pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 group-hover:visible group-hover:pointer-events-auto group-hover:delay-150 transition-all duration-200 ease-out z-[9999]">
-                <span className="w-full flex items-center px-4 py-2 font-semibold text-white/90 text-xs tracking-wide border-b border-white/20">
-                  Certificates
-                </span>
-                {certificateItems.map((item, index) => {
-                  const active = isActive(item.path);
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => router.push(item.path)}
-                      className={`w-full flex items-center gap-3 px-4 py-2 text-left text-sm transition-colors ${active ? "bg-white/20 font-semibold" : "hover:bg-white/10"}`}
-                    >
-                      <item.icon size={16} />
-                      <span>{item.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
         </nav>
 
         {/* Logout Section */}

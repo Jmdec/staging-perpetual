@@ -1,10 +1,11 @@
 "use client"
 
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import AdminSidebar from "@/components/AdminSidebar";
-import AdminHeader from "@/components/adminHeader";
-import { authClient } from "@/lib/auth";
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import AdminSidebar from '@/components/AdminSidebar';
+import AdminBottomNav from '@/components/adminBottomNav';
+import AdminHeader from '@/components/adminHeader';
+import { authClient } from '@/lib/auth';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -14,7 +15,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
   const [isChecking, setIsChecking] = useState(true);
   const [user, setUser] = useState<any>(null);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false); // Declare isSidebarCollapsed and setIsSidebarCollapsed
+
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
 
   useEffect(() => {
     async function checkAuth() {
@@ -71,11 +74,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-slate-100">
-      {/* Hamburger Menu Sidebar */}
-      <AdminSidebar />
+      
+      {/* Sidebar - Desktop only */}
+      <AdminSidebar
+        isCollapsed={isSidebarCollapsed}
+        setIsCollapsed={setIsSidebarCollapsed}
+      />
 
       {/* Main Content */}
-      <div className="pt-16">
+      <div className={`pb-20 lg:pb-0 transition-all duration-300  ${isSidebarCollapsed ? "lg:ml-[70px]" : "lg:ml-[300px]"}  `}>
+
         {/* Header */}
         <AdminHeader />
 
@@ -84,6 +92,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           {children}
         </main>
       </div>
+
+      {/* Bottom Navigation - Mobile only */}
+      <AdminBottomNav />
     </div>
   );
 }

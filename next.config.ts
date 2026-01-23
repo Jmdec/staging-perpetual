@@ -1,46 +1,52 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import type { NextConfig } from "next"
+import path from "path"
+
+const nextConfig: NextConfig = {
   images: {
-    domains: ['localhost'],
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '8000',
-        pathname: '/images/**',
+        protocol: "https",
+        hostname: "example.com",
+        pathname: "/**",
       },
-    ],
-    unoptimized: true, // Add this to allow local images from public folder
+    ], 
+    domains: ['localhost'],
   },
-  headers: async () => {
+
+  // Fix Turbopack workspace root warning
+  turbopack: {
+    root: path.join(__dirname),
+  },
+
+  async headers() {
     return [
       {
-        source: '/manifest.json',
+        source: "/manifest.json",
         headers: [
           {
-            key: 'Content-Type',
-            value: 'application/manifest+json',
+            key: "Content-Type",
+            value: "application/manifest+json",
           },
           {
-            key: 'Cache-Control',
-            value: 'public, max-age=0, must-revalidate',
+            key: "Cache-Control",
+            value: "public, max-age=0, must-revalidate",
           },
         ],
       },
       {
-        source: '/sw.js',
+        source: "/sw.js",
         headers: [
           {
-            key: 'Content-Type',
-            value: 'application/javascript; charset=utf-8',
+            key: "Content-Type",
+            value: "application/javascript; charset=utf-8",
           },
           {
-            key: 'Cache-Control',
-            value: 'public, max-age=0, must-revalidate',
+            key: "Cache-Control",
+            value: "public, max-age=0, must-revalidate",
           },
           {
-            key: 'Service-Worker-Allowed',
-            value: '/',
+            key: "Service-Worker-Allowed",
+            value: "/",
           },
         ],
       },
@@ -48,4 +54,4 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+export default nextConfig

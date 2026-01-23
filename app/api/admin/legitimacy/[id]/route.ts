@@ -1,23 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  process.env.API_URL ||
-  "http://localhost:8000/api"
-
-type RouteContext = {
-  params: Promise<{
-    id: string
-  }>
-}
-
+/* ===================== PUT ===================== */
 export async function PUT(
   request: NextRequest,
-  context: RouteContext
-) {
+  context: { params: Promise<{ id: string }> }
+): Promise<Response> {
   try {
     const { id } = await context.params
+
     const cookieStore = await cookies()
     const authToken = cookieStore.get("auth_token")
 
@@ -30,57 +21,38 @@ export async function PUT(
 
     const formData = await request.formData()
 
-    const newFormData = new FormData()
-    newFormData.append("_method", "PUT")
-
-    for (const [key, value] of formData.entries()) {
-      newFormData.append(key, value)
-    }
-
     const response = await fetch(
-      `${API_URL}/admin/legitimacy/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/admin/legitimacy/${id}`,
       {
-        method: "POST", // Laravel spoofing
+        method: "PUT",
         headers: {
           Accept: "application/json",
           Authorization: `Bearer ${authToken.value}`,
           "X-Requested-With": "XMLHttpRequest",
         },
-        body: newFormData,
+        body: formData,
       }
     )
 
-    const contentType = response.headers.get("content-type")
-    const data = contentType?.includes("application/json")
-      ? await response.json()
-      : null
-
-    if (!data) {
-      return NextResponse.json(
-        { success: false, message: "Invalid response from server" },
-        { status: 500 }
-      )
-    }
-
+    const data = await response.json()
     return NextResponse.json(data, { status: response.status })
   } catch (error) {
+    console.error(error)
     return NextResponse.json(
-      {
-        success: false,
-        message: "Internal server error",
-        error: error instanceof Error ? error.message : "Unknown error",
-      },
+      { success: false, message: "Internal server error" },
       { status: 500 }
     )
   }
 }
 
+/* ===================== DELETE ===================== */
 export async function DELETE(
   _request: NextRequest,
-  context: RouteContext
-) {
+  context: { params: Promise<{ id: string }> }
+): Promise<Response> {
   try {
     const { id } = await context.params
+
     const cookieStore = await cookies()
     const authToken = cookieStore.get("auth_token")
 
@@ -92,7 +64,7 @@ export async function DELETE(
     }
 
     const response = await fetch(
-      `${API_URL}/admin/legitimacy/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/admin/legitimacy/${id}`,
       {
         method: "DELETE",
         headers: {
@@ -106,12 +78,9 @@ export async function DELETE(
     const data = await response.json()
     return NextResponse.json(data, { status: response.status })
   } catch (error) {
+    console.error(error)
     return NextResponse.json(
-      {
-        success: false,
-        message: "Internal server error",
-        error: error instanceof Error ? error.message : "Unknown error",
-      },
+      { success: false, message: "Internal server error" },
       { status: 500 }
     )
   }
