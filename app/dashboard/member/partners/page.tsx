@@ -277,6 +277,7 @@ export default function MemberPartnersPage() {
                             setIsViewOpen(true)
                           }}
                           className="text-blue-400 p-1.5 rounded hover:bg-blue-50"
+                          title="View details"
                         >
                           <Eye />
                         </button>
@@ -290,6 +291,7 @@ export default function MemberPartnersPage() {
                           className={`text-orange-600 p-1.5 rounded hover:bg-orange-50 ${
                             partner.status !== "pending" ? "opacity-50 cursor-not-allowed hover:bg-transparent" : ""
                           }`}
+                          title={partner.status === "pending" ? "Edit application" : "Only pending applications can be edited"}
                         >
                           <Pencil />
                         </button>
@@ -300,6 +302,7 @@ export default function MemberPartnersPage() {
                           className={`text-red-400 p-1.5 rounded hover:bg-red-50 ${
                             partner.status !== "pending" ? "opacity-50 cursor-not-allowed hover:bg-transparent" : ""
                           }`}
+                          title={partner.status === "pending" ? "Delete application" : "Only pending applications can be deleted"}
                         >
                           <Trash />
                         </button>

@@ -327,9 +327,9 @@ export default function LegitimacyPage() {
                           </button>
                           <button
                             onClick={() => openEditModal(app)}
-                            disabled={app.status === 'rejected'}
+                            disabled={app.status !== 'pending'}
                             className={`p-1.5 rounded transition-colors ${
-                              app.status === 'rejected'
+                              app.status === 'pending'
                                 ? 'text-gray-400 cursor-not-allowed'
                                 : 'text-orange-600 hover:bg-orange-50'
                             }`}
@@ -341,7 +341,7 @@ export default function LegitimacyPage() {
                             onClick={() => openDeleteModal(app)}
                             disabled={app.status !== 'pending'}
                             className={`p-1.5 rounded transition-colors ${
-                              app.status === 'rejected'
+                              app.status === 'pending'
                                 ? 'text-gray-400 cursor-not-allowed'
                                 : 'text-red-600 hover:bg-red-50'
                             }`}
