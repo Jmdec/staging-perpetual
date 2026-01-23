@@ -714,17 +714,6 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-
-              <div className="border-t-2 border-gray-200 px-8 md:px-10 py-6 bg-linear-to-r from-red-50 via-orange-50 to-green-50">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setSelectedArticle(null)}
-                  className="w-full sm:w-auto px-8 py-4 bg-linear-to-r from-red-600 via-orange-600 to-green-600 text-white rounded-full hover:shadow-2xl transition-all font-bold text-lg"
-                >
-                  Close
-                </motion.button>
-              </div>
             </motion.div>
           </motion.div>
         )}
@@ -778,7 +767,7 @@ export default function Home() {
                     </div>
 
                     <p className="italic text-gray-700 mb-6 text-xs sm:text-sm leading-relaxed flex-1">
-                      "{t.message}"
+                      &apos;{t.message}&apos;
                     </p>
 
                     <div className="flex items-center gap-3 mt-4">
@@ -914,15 +903,6 @@ export default function Home() {
                   <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
                     {selectedAnnouncement.content}
                   </p>
-                </div>
-
-                <div className="mt-8 flex gap-4">
-                  <button
-                    onClick={() => setSelectedAnnouncement(null)}
-                    className="flex-1 px-6 py-3 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold transition-all"
-                  >
-                    Close
-                  </button>
                 </div>
               </div>
             </motion.div>

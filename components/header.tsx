@@ -180,14 +180,19 @@ export default function Header() {
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center gap-2 md:gap-3 cursor-pointer"
             >
-              <div className="flex items-center justify-center flex-shrink-0 w-12 h-12 md:w-14 md:h-14 mt-2">
+              <div
+                className="w-10 h-10 rounded-full
+                  bg-gradient-to-b from-yellow-600/90 via-red-800/90 to-red-900/90
+                  flex items-center justify-center flex-shrink-0
+                  ring-2 ring-white/30 shadow-lg"
+              >
                 <img
                   src="/perpetuallogo.jpg"
                   alt="Perpetual Village Logo"
-                  className="w-full h-full object-contain"
+                  className="w-10 h-10 rounded-full object-cover"
                 />
               </div>
-                <span className="text-base md:text-lg font-bold gradient-text">Perpetual Help</span>
+              <span className="text-base md:text-lg font-bold gradient-text">Perpetual Help</span>
             </motion.div>
           </Link>
 

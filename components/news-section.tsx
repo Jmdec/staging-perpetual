@@ -108,7 +108,7 @@ export default function NewsSection() {
 
   return (
     <>
-      <div className="py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-white">
+      <div className="py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidde">
         <div className="max-w-7xl mx-auto relative z-10">
 
           {loading ? (
@@ -233,75 +233,70 @@ export default function NewsSection() {
               exit={{ scale: 0.8, opacity: 0, y: 50 }}
               transition={{ type: "spring", damping: 25 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col"
+              className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
             >
-              {/* Modal Header with Image */}
-              <div className="relative overflow-hidden bg-gray-600 p-2 md:p-3">
+              <div className="relative h-72 md:h-96 overflow-hidden">
                 {selectedArticle.image ? (
-                  <div className="w-full flex items-center justify-center">
-                    <img
-                      src={getImageUrl(selectedArticle.image)}
-                      alt={selectedArticle.title}
-                      className="w-full h-auto max-h-[350px] object-cover rounded-xl shadow-lg"
-                      onError={(e) => {
-                        e.currentTarget.src = "/placeholder.svg"
-                      }}
-                    />
-                  </div>
+                  <img
+                    src={`${process.env.NEXT_PUBLIC_IMAGE_URL || "http://localhost:8000"}/${selectedArticle.image}`}
+                    alt={selectedArticle.title}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
-                  <div className="w-full h-64 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-xl"></div>
+                  <div className="w-full h-full bg-linear-to-r from-red-500 via-orange-500 to-green-500 flex items-center justify-center text-white text-8xl">
+                    📰
+                  </div>
                 )}
 
+                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setSelectedArticle(null)}
+                  className="absolute top-6 right-6 bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-xl hover:bg-white transition-colors z-10"
+                  aria-label="Close modal"
+                >
+                  <X className="w-6 h-6 text-gray-700" />
+                </motion.button>
               </div>
 
-              {/* Modal Content */}
-              <div className="flex-1 overflow-hidden px-3 py-4 md:px-8 md:py-6">
-                <div className="space-y-2">
-                  {/* Title */}
-                  <h2 className="text-3xl md:text-3xl font-bold bg-gray-800 bg-clip-text text-transparent leading-tight">
+              <div className="flex-1 overflow-y-auto p-8 md:p-10">
+                <div className="space-y-6">
+                  <h2 className="text-3xl md:text-4xl font-bold bg-linear-to-r from-red-600 via-orange-600 to-green-600 bg-clip-text text-transparent leading-tight">
                     {selectedArticle.title}
                   </h2>
 
-                  {/* Meta Info */}
-                  {/* <div className="flex flex-wrap items-center gap-6 pb-1 border-b-2 border-gray-200">
+                  <div className="flex flex-wrap items-center gap-6 pb-6 border-b-2 border-gray-200">
                     <div className="flex items-center gap-2 text-gray-600">
-                      <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                        <Calendar className="w-4 h-4 text-gray-600" />
+                      <div className="w-10 h-10 bg-linear-to-br from-red-100 via-orange-100 to-green-100 rounded-full flex items-center justify-center">
+                        <Calendar className="w-5 h-5 text-orange-600" />
                       </div>
                       <span className="font-medium">
-                        {formatDate(selectedArticle.published_at || selectedArticle.created_at)}
+                        {selectedArticle.published_at
+                          ? formatDate(selectedArticle.published_at)
+                          : formatDate(selectedArticle.created_at)}
                       </span>
-                    </div> */}
+                    </div>
 
-                  {/* {selectedArticle.author && (
+                    {selectedArticle.author && (
                       <div className="flex items-center gap-2 text-gray-600">
-                        <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                          <User className="w-4 h-4 text-gray-600" />
+                        <div className="w-10 h-10 bg-linear-to-br from-red-100 via-orange-100 to-green-100 rounded-full flex items-center justify-center">
+                          <User className="w-5 h-5 text-orange-600" />
                         </div>
-                        <span className="font-medium">By {selectedArticle.author.name}</span>
+                        <span className="font-medium">
+                          By {selectedArticle.author.name}
+                        </span>
                       </div>
                     )}
-                  </div> */}
+                  </div>
 
-                  {/* Content */}
                   <div className="prose prose-lg max-w-none">
                     <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-line">
                       {selectedArticle.content}
                     </p>
                   </div>
                 </div>
-              </div>
-
-              {/* Modal Footer */}
-              <div className="border-t-2 border-gray-200 px-8 md:px-10 py-6 bg-gradient-to-r from-red-50 via-yellow-50 to-green-50">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setSelectedArticle(null)}
-                  className="w-full sm:w-auto px-8 py-4 bg-gradient-to-tl from-yellow-600 via-red-700 to-red-900 text-white rounded-full hover:shadow-2xl transition-all font-bold text-lg"
-                >
-                  Close
-                </motion.button>
               </div>
             </motion.div>
           </motion.div>
