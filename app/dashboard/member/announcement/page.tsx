@@ -123,7 +123,6 @@ export default function NewsPage() {
   return (
     <MemberLayout>
       <div className="min-h-screen bg-gray-50 overflow-x-hidden">
-        {/* ================= HEADER ================= */}
         <header className="sticky top-0 z-20 bg-linear-to-r from-amber-600 to-red-500 text-white shadow-md">
           <div className="px-4 sm:px-6 py-3 sm:py-4">
             <div className="flex items-start sm:items-center justify-between gap-3">
