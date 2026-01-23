@@ -15,7 +15,8 @@ import {
   Send,
   User,
   Calendar,
-  MessageSquare
+  MessageSquare,
+  Contact
 } from "lucide-react"
 import AdminLayout from "@/components/adminLayout"
 import { useAuth } from "@/hooks/useAuth"
@@ -259,7 +260,18 @@ export default function AdminContactMessagesPage() {
     <AdminLayout>
       <div className="h-full overflow-auto bg-gray-50">
         {/* Header */}
-        
+        <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 sticky top-0 z-10">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Contact Management</h1>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">Manage and review contact messages</p>
+            </div>
+            <div className="hidden sm:flex items-center gap-2 text-sm text-gray-600">
+              <Contact className="w-5 h-5" />
+              <span className="font-medium">{pagination.total} Total</span>
+            </div>
+          </div>
+        </header>
 
         {/* Main Content */}
         <main className="px-4 sm:px-6 py-4 sm:py-6">
@@ -276,7 +288,7 @@ export default function AdminContactMessagesPage() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   />
                 </div>
 
@@ -290,7 +302,7 @@ export default function AdminContactMessagesPage() {
                         setStatusFilter(e.target.value)
                         setPagination((prev) => ({ ...prev, current_page: 1 }))
                       }}
-                      className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent appearance-none bg-white"
+                      className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none bg-white"
                     >
                       <option value="all">All Status</option>
                       <option value="unread">Unread</option>
@@ -336,7 +348,7 @@ export default function AdminContactMessagesPage() {
               {loading ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="text-center">
-                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500 mx-auto mb-3"></div>
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500 mx-auto mb-3"></div>
                     <p className="text-gray-600 text-sm">Loading messages...</p>
                   </div>
                 </div>
@@ -352,7 +364,7 @@ export default function AdminContactMessagesPage() {
                   <div className="overflow-x-auto">
                     <div className="inline-block min-w-full align-middle">
                       <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-linear-to-r from-emerald-600 to-orange-500 text-white">
+                        <thead className="bg-linear-to-r from-orange-600 to-orange-500 text-white">
                           <tr>
                             <th className="px-3 sm:px-4 py-3 text-left text-xs font-semibold uppercase whitespace-nowrap">Name</th>
                             <th className="px-3 sm:px-4 py-3 text-left text-xs font-semibold uppercase whitespace-nowrap">Email</th>
@@ -360,7 +372,7 @@ export default function AdminContactMessagesPage() {
                             <th className="px-3 sm:px-4 py-3 text-left text-xs font-semibold uppercase whitespace-nowrap">Message</th>
                             <th className="px-3 sm:px-4 py-3 text-left text-xs font-semibold uppercase whitespace-nowrap">Status</th>
                             <th className="px-3 sm:px-4 py-3 text-left text-xs font-semibold uppercase whitespace-nowrap">Date</th>
-                            <th className="px-3 sm:px-4 py-3 text-center text-xs font-semibold uppercase whitespace-nowrap sticky right-0 bg-linear-to-r from-emerald-600 to-orange-500">Actions</th>
+                            <th className="px-3 sm:px-4 py-3 text-center text-xs font-semibold uppercase whitespace-nowrap sticky right-0 bg-linear-to-r from-orange-600 to-orange-500">Actions</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 bg-white">
@@ -395,7 +407,7 @@ export default function AdminContactMessagesPage() {
                               <td className="px-3 sm:px-4 py-3 text-center whitespace-nowrap sticky right-0 bg-white">
                                 <button
                                   onClick={() => handleViewMessage(message)}
-                                  className="inline-flex items-center gap-1 px-2 sm:px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium hover:bg-emerald-200 transition-colors"
+                                  className="inline-flex items-center gap-1 px-2 sm:px-3 py-1.5 bg-orange-100 text-orange-700 rounded-lg text-xs font-medium hover:bg-orange-200 transition-colors"
                                 >
                                   <Eye className="w-3 h-3" />
                                   <span className="hidden sm:inline">View</span>
@@ -409,8 +421,8 @@ export default function AdminContactMessagesPage() {
                   </div>
 
                   {/* Scroll Hint */}
-                  <div className="lg:hidden bg-emerald-50 border-t border-emerald-100 px-4 py-2 text-center">
-                    <p className="text-xs text-emerald-700 flex items-center justify-center gap-1">
+                  <div className="lg:hidden bg-orange-50 border-t border-orange-100 px-4 py-2 text-center">
+                    <p className="text-xs text-orange-700 flex items-center justify-center gap-1">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
                       </svg>
@@ -459,7 +471,7 @@ export default function AdminContactMessagesPage() {
                             key={pageNum}
                             onClick={() => handlePageChange(pageNum)}
                             className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${pagination.current_page === pageNum
-                                ? "bg-emerald-600 text-white"
+                                ? "bg-orange-600 text-white"
                                 : "border border-gray-300 hover:bg-gray-50"
                               }`}
                           >
@@ -516,7 +528,7 @@ export default function AdminContactMessagesPage() {
                   {/* Sender Information */}
                   <div>
                     <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-3 flex items-center gap-2">
-                      <User className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
+                      <User className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
                       Sender Information
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -532,7 +544,7 @@ export default function AdminContactMessagesPage() {
                           <Mail className="w-3 h-3 sm:w-4 sm:h-4" />
                           Email
                         </label>
-                        <a href={`mailto:${selectedMessage.email}`} className="text-sm sm:text-base text-emerald-600 hover:text-emerald-700 font-medium break-all">
+                        <a href={`mailto:${selectedMessage.email}`} className="text-sm sm:text-base text-orange-600 hover:text-orange-700 font-medium break-all">
                           {selectedMessage.email}
                         </a>
                       </div>
@@ -542,7 +554,7 @@ export default function AdminContactMessagesPage() {
                   {/* Message Content */}
                   <div>
                     <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-3 flex items-center gap-2">
-                      <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
+                      <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
                       Message
                     </h3>
                     <div className="space-y-3">
@@ -570,7 +582,7 @@ export default function AdminContactMessagesPage() {
                   {selectedMessage.replies && selectedMessage.replies.length > 0 && (
                     <div>
                       <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-3 flex items-center gap-2">
-                        <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
+                        <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
                         Previous Replies
                       </h3>
                       <div className="space-y-3">
@@ -578,7 +590,7 @@ export default function AdminContactMessagesPage() {
                           <div key={reply.id} className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex items-center gap-2">
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-linear-to-r from-emerald-600 to-orange-500 text-white rounded-full text-sm font-semibold shadow-sm">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-linear-to-r from-orange-600 to-orange-500 text-white rounded-full text-sm font-semibold shadow-sm">
                                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
                                   </svg>
@@ -597,7 +609,7 @@ export default function AdminContactMessagesPage() {
                   {/* Reply Form */}
                   <div>
                     <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-3 flex items-center gap-2">
-                      <Send className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
+                      <Send className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
                       Send Reply
                     </h3>
                     <div className="space-y-3">
@@ -607,7 +619,7 @@ export default function AdminContactMessagesPage() {
                           rows={6}
                           value={replyMessage}
                           onChange={(e) => setReplyMessage(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm"
+                          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
                           placeholder="Type your reply here..."
                           disabled={isSendingReply}
                         />
@@ -630,7 +642,7 @@ export default function AdminContactMessagesPage() {
                   <button
                     onClick={handleSendReply}
                     disabled={isSendingReply || !replyMessage.trim()}
-                    className="w-full sm:w-auto px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full sm:w-auto px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-900 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {isSendingReply ? (
                       <>
