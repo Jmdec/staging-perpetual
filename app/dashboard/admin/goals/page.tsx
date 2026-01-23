@@ -7,9 +7,15 @@ import {
   Hash,
   Tag,
   Save,
-  Target
+  Target,
+  AlertCircle,
+  RefreshCw,
+  Award,
+  Users,
+  Globe,
+  Home,
+  Leaf
 } from "lucide-react"
-import AdminLayout from "@/components/adminLayout"
 
 type GoalsCard = {
   id: number;
@@ -23,6 +29,7 @@ export default function AboutGoalsPage() {
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isEdit, setIsEdit] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const [formData, setFormData] = useState({
     goals_header: "",
@@ -47,6 +54,7 @@ export default function AboutGoalsPage() {
   const fetchGoalsData = async () => {
     try {
       setLoading(true)
+      setError(null)
       const response = await fetch("/api/goals")
 
       if (response.ok) {
@@ -59,19 +67,51 @@ export default function AboutGoalsPage() {
             goals_description: data.data.goals_description || "",
           })
 
-          // Parse JSON arrays from database - they're already parsed by the Next.js API
-          const icons = Array.isArray(data.data.goals_card_icon) 
-            ? data.data.goals_card_icon 
-            : []
-          const titles = Array.isArray(data.data.goals_card_title) 
-            ? data.data.goals_card_title 
-            : []
-          const contents = Array.isArray(data.data.goals_card_content) 
-            ? data.data.goals_card_content 
-            : []
-          const lists = Array.isArray(data.data.goals_card_list) 
-            ? data.data.goals_card_list 
-            : []
+          // Parse arrays - handle both parsed and string formats
+          let icons = data.data.goals_card_icon || []
+          let titles = data.data.goals_card_title || []
+          let contents = data.data.goals_card_content || []
+          let lists = data.data.goals_card_list || []
+
+          // Parse if they come as JSON strings
+          if (typeof icons === 'string') {
+            try {
+              icons = JSON.parse(icons)
+            } catch (e) {
+              console.error("Error parsing icons:", e)
+              icons = []
+            }
+          }
+          if (typeof titles === 'string') {
+            try {
+              titles = JSON.parse(titles)
+            } catch (e) {
+              console.error("Error parsing titles:", e)
+              titles = []
+            }
+          }
+          if (typeof contents === 'string') {
+            try {
+              contents = JSON.parse(contents)
+            } catch (e) {
+              console.error("Error parsing contents:", e)
+              contents = []
+            }
+          }
+          if (typeof lists === 'string') {
+            try {
+              lists = JSON.parse(lists)
+            } catch (e) {
+              console.error("Error parsing lists:", e)
+              lists = []
+            }
+          }
+
+          // Ensure they're arrays
+          if (!Array.isArray(icons)) icons = []
+          if (!Array.isArray(titles)) titles = []
+          if (!Array.isArray(contents)) contents = []
+          if (!Array.isArray(lists)) lists = []
 
           const maxLength = Math.max(
             icons.length,
@@ -91,15 +131,21 @@ export default function AboutGoalsPage() {
 
           setGoalsCards(cards)
         } else {
-          // No data exists, set to create mode
           setIsEdit(false)
         }
       } else if (response.status === 404) {
-        // No data found, set to create mode
         setIsEdit(false)
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || "Failed to fetch goals data")
       }
     } catch (error) {
       console.error("Error fetching goals data:", error)
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to connect to server"
+      )
       setIsEdit(false)
     } finally {
       setLoading(false)
@@ -140,11 +186,12 @@ export default function AboutGoalsPage() {
         !formData.goals_title ||
         !formData.goals_description
       ) {
-        alert("Please fill in all required fields")
+        setError("Please fill in all required fields")
         return
       }
 
       setIsSubmitting(true)
+      setError(null)
 
       const method = isEdit ? "PUT" : "POST"
 
@@ -177,19 +224,23 @@ export default function AboutGoalsPage() {
         data = JSON.parse(text)
         console.log("Parsed JSON:", data)
       } catch {
-        alert("Invalid server response")
+        setError("Invalid server response")
         return
       }
 
       if (response.ok && data.success) {
+        setError(null)
         alert(`Goals ${isEdit ? "updated" : "created"} successfully`)
         fetchGoalsData()
       } else {
+        setError(data.message || "Failed to save goals")
         alert(data.message || "Failed to save goals")
       }
     } catch (error) {
       console.error("Submit error:", error)
-      alert("Failed to save goals")
+      const errorMessage = error instanceof Error ? error.message : "Failed to save goals"
+      setError(errorMessage)
+      alert(errorMessage)
     } finally {
       setIsSubmitting(false)
     }
@@ -226,6 +277,36 @@ export default function AboutGoalsPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+          {/* Error Alert */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-red-900">Error</h3>
+                <p className="text-sm text-red-700 mt-1">{error}</p>
+              </div>
+              <button
+                onClick={() => setError(null)}
+                className="text-red-600 hover:text-red-800"
+              >
+                ×
+              </button>
+            </div>
+          )}
+
+          {/* Retry Button */}
+          {error && (
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <button
+                onClick={fetchGoalsData}
+                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Retry Loading Data
+              </button>
+            </div>
+          )}
+
           {/* Main Information Card */}
           <div className="bg-white rounded-lg border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Goals Information</h2>

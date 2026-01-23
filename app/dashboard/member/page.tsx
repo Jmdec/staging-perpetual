@@ -52,10 +52,14 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
 
 
 const userAPI = {
-  me: () => fetchWithAuth("/api/user/me"),
+  me: () => fetchWithAuth("/api/auth/me"),
 };
 
 const juantapAPI = {
+  get: () =>
+    fetchWithAuth("/api/juantap", {
+      method: "GET",
+    }),
   create: (data: any) =>
     fetchWithAuth("/api/juantap", {
       method: "POST",
@@ -65,6 +69,10 @@ const juantapAPI = {
     fetchWithAuth("/api/juantap", {
       method: "PUT",
       body: JSON.stringify(data),
+    }),
+  delete: () =>
+    fetchWithAuth("/api/juantap", {
+      method: "DELETE",
     }),
 };
 
@@ -79,9 +87,10 @@ const BUSINESS_PARTNERS = [
 
 export default function MemberDashboard() {
   const router = useRouter();
-  const {user, loading: authLoading} = useAuth(true)
-  const [setUser] = useState<User | null>(null);
+  const { user: authUser, loading: authLoading } = useAuth(true)
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState("");
@@ -93,6 +102,7 @@ export default function MemberDashboard() {
     status: "inactive" as "active" | "inactive",
     subscription: "free" as "free" | "basic" | "premium",
   });
+  const [juantapProfile, setJuanTapProfile] = useState<JuanTapProfile | null>(null);
 
   useEffect(() => {
     fetchUser();
@@ -100,17 +110,37 @@ export default function MemberDashboard() {
 
   const fetchUser = async () => {
     try {
+      setLoading(true);
+      setError(null);
       const res = await userAPI.me();
-      setUser(res.data);
-    } catch {
+      console.log("User data received:", res);
+      setUser(res.user);
+
+      // Fetch JuanTap profile separately since backend doesn't include it
+      await fetchJuanTapProfileData();
+    } catch (err: any) {
+      console.error("Error fetching user:", err);
+      setError(err.message);
       router.push("/login");
     } finally {
       setLoading(false);
     }
   };
 
-  const hasJuanTapProfile = Boolean(user?.juantap_profile);
-  const juantapProfile = user?.juantap_profile;
+  const fetchJuanTapProfileData = async () => {
+    try {
+      const res = await juantapAPI.get();
+      console.log("JuanTap Profile response:", res);
+      if (res.data) {
+        setJuanTapProfile(res.data);
+      }
+    } catch (err: any) {
+      console.log("No existing JuanTap profile found");
+      // It's okay if this fails - user just doesn't have a profile yet
+    }
+  };
+
+  const hasJuanTapProfile = Boolean(juantapProfile);
 
   const openModal = () => {
     if (juantapProfile) {
@@ -156,7 +186,26 @@ export default function MemberDashboard() {
         ? await juantapAPI.update(formData)
         : await juantapAPI.create(formData);
 
-      await fetchUser();
+      await fetchJuanTapProfileData();
+      setShowModal(false);
+    } catch (err: any) {
+      setFormError(err.message);
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete your JuanTap profile? This action cannot be undone.")) {
+      return;
+    }
+
+    setFormLoading(true);
+    setFormError("");
+
+    try {
+      await juantapAPI.delete();
+      await fetchJuanTapProfileData();
       setShowModal(false);
     } catch (err: any) {
       setFormError(err.message);
@@ -169,7 +218,28 @@ export default function MemberDashboard() {
     return (
       <MemberLayout>
         <div className="min-h-screen flex items-center justify-center">
-          Loading...
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading your dashboard...</p>
+          </div>
+        </div>
+      </MemberLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <MemberLayout>
+        <div className="min-h-screen flex items-center justify-center px-4">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">{error}</p>
+            <button
+              onClick={() => fetchUser()}
+              className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+            >
+              Retry
+            </button>
+          </div>
         </div>
       </MemberLayout>
     );
@@ -195,18 +265,19 @@ export default function MemberDashboard() {
         </div>
 
         {/* JuanTap Profile & Gallery Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           {/* JuanTap Profile Card */}
-          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition">
+            {/* Header */}
+            <div className="flex items-center gap-4 mb-5">
+              <div className="w-11 h-11 bg-orange-500 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow">
                 JT
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-gray-800">
+                <h3 className="text-base font-semibold text-gray-800">
                   JuanTap Profile
                 </h3>
-                <p className="text-xs text-gray-500 truncate">
+                <p className="text-sm text-gray-500 truncate">
                   Digital identity & smart profile
                 </p>
               </div>
@@ -214,65 +285,61 @@ export default function MemberDashboard() {
 
             {hasJuanTapProfile ? (
               <>
-                {/* Compact Status Display */}
-                <div className="flex items-center gap-2 mb-3">
-                  <div className={`flex-1 ${juantapProfile?.status === 'active' ? 'bg-green-50' : 'bg-orange-50'} rounded-lg p-2 text-center`}>
-                    <p className={`text-xs font-semibold ${juantapProfile?.status === 'active' ? 'text-green-600' : 'text-orange-600'}`}>
-                      {juantapProfile?.status === 'active' ? '✓ Active' : '○ Inactive'}
-                    </p>
-                  </div>
-                  <div className="flex-1 bg-gray-50 rounded-lg p-2 text-center">
-                    <p className="text-xs font-semibold text-gray-700 capitalize">
-                      {juantapProfile?.subscription}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Compact QR & URL Display */}
+                {/* QR & Profile URL */}
                 {(juantapProfile?.profile_url || juantapProfile?.qr_code) && (
-                  <div className="flex items-center gap-3 mb-3 p-2 bg-gray-50 rounded-lg">
+                  <div className="flex gap-4 p-3 mb-4">
+                    <div className="flex-1 justify-center text-center">
                     {juantapProfile?.qr_code && (
                       <img
                         src={juantapProfile.qr_code}
                         alt="QR Code"
-                        className="w-12 h-12 border border-gray-200 rounded flex-shrink-0"
+                        className="w-50 lg:w-70 w-50 lg:h-70 rounded-lg border bg-white items-center mx-auto"
                       />
                     )}
+
                     {juantapProfile?.profile_url && (
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-gray-500 mb-0.5">Profile URL</p>
+                      <div className="flex-1 min-w-0 mt-2 lg:my-5">
+                        <p className="text-md text-gray-500 mb-1">
+                          Profile URL
+                        </p>
                         <a
                           href={juantapProfile.profile_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-orange-600 hover:underline truncate block"
+                          className="text-lg text-orange-600 hover:underline truncate block font-medium"
                         >
                           {juantapProfile.profile_url}
                         </a>
                       </div>
                     )}
+                    </div>
                   </div>
                 )}
 
+                {/* Action */}
                 <button
                   onClick={openModal}
-                  className="w-full px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-sm font-medium"
+                  className="w-full py-2.5 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition font-medium text-sm"
                 >
-                  {(juantapProfile?.profile_url || juantapProfile?.qr_code) ? 'Update' : 'Add Details'}
+                  {(juantapProfile?.profile_url || juantapProfile?.qr_code)
+                    ? "Update Profile"
+                    : "Add Details"}
                 </button>
               </>
             ) : (
               <>
                 <button
-                  onClick={() => window.open('https://www.juantap.info/', '_blank')}
-                  className="w-full px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-sm font-medium mb-2"
+                  onClick={() =>
+                    window.open("https://www.juantap.info/", "_blank")
+                  }
+                  className="w-full py-2.5 mb-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition font-medium text-sm"
                 >
                   Avail JuanTap Subscription
                 </button>
 
                 <button
                   onClick={openModal}
-                  className="w-full px-3 py-2 border-2 border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition text-sm font-medium"
+                  className="w-full py-2.5 border-2 border-emerald-600 text-emerald-600 rounded-xl hover:bg-emerald-50 transition font-medium text-sm"
                 >
                   Add Existing Profile
                 </button>
@@ -281,27 +348,28 @@ export default function MemberDashboard() {
           </div>
 
           {/* Gallery Section */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-base font-semibold text-gray-800">
                 Gallery
               </h2>
-              <button className="text-sm text-emerald-600 hover:underline">
+              <button className="text-sm font-medium text-emerald-600 hover:underline">
                 View all
               </button>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[1, 2, 3, 4, 5, 6].map((item) => (
                 <div
                   key={item}
-                  className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 group cursor-pointer"
+                  className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 group cursor-pointer border border-gray-200"
                 >
                   <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
                     Image {item}
                   </div>
+
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                    <span className="text-white text-xs font-medium">
+                    <span className="text-white text-xs font-semibold">
                       View
                     </span>
                   </div>
@@ -310,6 +378,7 @@ export default function MemberDashboard() {
             </div>
           </div>
         </div>
+
 
         {/* JUANTAP MODAL */}
         {showModal && (
@@ -390,6 +459,16 @@ export default function MemberDashboard() {
                   >
                     Cancel
                   </button>
+                  {hasJuanTapProfile && (
+                    <button
+                      type="button"
+                      onClick={handleDelete}
+                      disabled={formLoading}
+                      className="flex-1 px-4 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 disabled:opacity-50"
+                    >
+                      {formLoading ? "Deleting..." : "Delete"}
+                    </button>
+                  )}
                   <button
                     type="submit"
                     disabled={formLoading}

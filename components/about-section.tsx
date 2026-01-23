@@ -4,6 +4,23 @@ import React, { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Users, Home, Leaf, Award, Target, Globe, Loader2 } from "lucide-react"
 
+interface CommunityItem {
+  community_list: string
+  community_card_icon: string
+  community_card_number: string
+  community_card_category: string
+}
+
+interface CommunityData {
+  community_header: string
+  community_title: string
+  community_content: string
+  community_list: string[]
+  community_card_icon: string[]
+  community_card_number: string[]
+  community_card_category: string[]
+}
+
 interface ObjectiveData {
   objectives_header: string
   objectives_title: string
@@ -21,6 +38,7 @@ interface MissionVisionData {
 }
 
 export default function AboutSection() {
+  const [communityData, setCommunityData] = useState<CommunityData | null>(null)
   const [objectivesData, setObjectivesData] = useState<ObjectiveData | null>(null)
   const [missionVisionData, setMissionVisionData] = useState<MissionVisionData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -65,31 +83,116 @@ export default function AboutSection() {
       setLoading(true)
       setError(null)
 
-      // Fetch both objectives and mission/vision data
-      const [objectivesRes, missionVisionRes] = await Promise.all([
+      // Fetch all data: community, objectives, and mission/vision
+      const [communityRes, objectivesRes, missionVisionRes] = await Promise.all([
+        fetch("/api/our-community"),
         fetch("/api/objectives"),
         fetch("/api/mission-and-vision")
       ])
+
+      // Handle community data
+      if (communityRes.ok) {
+        const communityJson = await communityRes.json()
+        if (communityJson.success && communityJson.data) {
+          const data = communityJson.data
+
+          // Parse arrays if they come as JSON strings
+          let lists = data.community_list || []
+          let icons = data.community_card_icon || []
+          let numbers = data.community_card_number || []
+          let categories = data.community_card_category || []
+
+          if (typeof lists === 'string') {
+            try {
+              lists = JSON.parse(lists)
+            } catch (e) {
+              console.error("Error parsing community lists:", e)
+              lists = []
+            }
+          }
+          if (typeof icons === 'string') {
+            try {
+              icons = JSON.parse(icons)
+            } catch (e) {
+              console.error("Error parsing community icons:", e)
+              icons = []
+            }
+          }
+          if (typeof numbers === 'string') {
+            try {
+              numbers = JSON.parse(numbers)
+            } catch (e) {
+              console.error("Error parsing community numbers:", e)
+              numbers = []
+            }
+          }
+          if (typeof categories === 'string') {
+            try {
+              categories = JSON.parse(categories)
+            } catch (e) {
+              console.error("Error parsing community categories:", e)
+              categories = []
+            }
+          }
+
+          // Ensure they're arrays
+          if (!Array.isArray(lists)) lists = []
+          if (!Array.isArray(icons)) icons = []
+          if (!Array.isArray(numbers)) numbers = []
+          if (!Array.isArray(categories)) categories = []
+
+          const parsedData = {
+            community_header: data.community_header || "",
+            community_title: data.community_title || "",
+            community_content: data.community_content || "",
+            community_list: lists,
+            community_card_icon: icons,
+            community_card_number: numbers,
+            community_card_category: categories
+          }
+
+          setCommunityData(parsedData)
+        }
+      }
 
       // Handle objectives data
       if (objectivesRes.ok) {
         const objectivesJson = await objectivesRes.json()
         if (objectivesJson.success && objectivesJson.data) {
           const data = objectivesJson.data
-          
-          // Parse JSON strings to arrays if needed
+
+          let titles = data.objectives_card_title || []
+          let contents = data.objectives_card_content || []
+
+          if (typeof titles === 'string') {
+            try {
+              titles = JSON.parse(titles)
+            } catch (e) {
+              console.error("Error parsing titles:", e)
+              titles = []
+            }
+          }
+
+          if (typeof contents === 'string') {
+            try {
+              contents = JSON.parse(contents)
+            } catch (e) {
+              console.error("Error parsing contents:", e)
+              contents = []
+            }
+          }
+
+          if (!Array.isArray(titles)) titles = []
+          if (!Array.isArray(contents)) contents = []
+
           const parsedData = {
             objectives_header: data.objectives_header || "",
             objectives_title: data.objectives_title || "",
             objectives_description: data.objectives_description || "",
-            objectives_card_title: typeof data.objectives_card_title === 'string' 
-              ? JSON.parse(data.objectives_card_title) 
-              : data.objectives_card_title || [],
-            objectives_card_content: typeof data.objectives_card_content === 'string'
-              ? JSON.parse(data.objectives_card_content)
-              : data.objectives_card_content || []
+            objectives_card_title: titles,
+            objectives_card_content: contents
           }
-          
+
           setObjectivesData(parsedData)
         }
       }
@@ -225,6 +328,148 @@ export default function AboutSection() {
             </motion.div>
           </motion.div>
         </div>
+
+        {/* Community Section */}
+        {communityData && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mt-24 mb-24"
+          >
+            <div className="text-center mb-12">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                className="inline-block mb-4"
+              >
+                <span className="px-4 py-2 rounded-full bg-white/60 backdrop-blur-sm text-sm font-semibold bg-gradient-to-r from-green-600 via-red-600 to-[#800000]/90 bg-clip-text text-transparent">
+                  {communityData.community_header}
+                </span>
+              </motion.div>
+
+              <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                <span className="bg-gradient-to-r from-yellow-600 via-red-600 to-red-900 bg-clip-text text-transparent">
+                  {communityData.community_title}
+                </span>
+              </h2>
+
+              {communityData.community_content && (
+                <p className="text-lg text-gray-700 max-w-3xl mx-auto">
+                  {communityData.community_content}
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+              {Array.isArray(communityData.community_list) && communityData.community_list.map((item, index) => {
+                // Map icon strings to actual icon components
+                const iconMap: { [key: string]: React.ReactNode } = {
+                  'Users': <Users className="w-6 h-6" />,
+                  'Home': <Home className="w-6 h-6" />,
+                  'Leaf': <Leaf className="w-6 h-6" />,
+                  'Award': <Award className="w-6 h-6" />,
+                  'Target': <Target className="w-6 h-6" />,
+                  'Globe': <Globe className="w-6 h-6" />,
+                }
+
+                return (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    whileHover={{ scale: 1.05 }}
+                    className="p-6 rounded-2xl bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all border border-transparent hover:border-orange-300"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 via-red-600 to-[#800000]/90 flex items-center justify-center mx-auto mb-3 text-white">
+                      {iconMap[communityData.community_card_icon[index]] || <Users className="w-6 h-6" />}
+                    </div>
+                    <h3 className="text-sm font-semibold text-center text-gray-700 mb-2">
+                      {item}
+                    </h3>
+                    <div className="text-2xl font-bold text-center bg-gradient-to-r from-yellow-600 via-red-600 to-red-900 bg-clip-text text-transparent mb-1">
+                      {communityData.community_card_number[index]}
+                    </div>
+                    <p className="text-xs text-center text-gray-600">
+                      {communityData.community_card_category[index]}
+                    </p>
+                  </motion.div>
+                )
+              })}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Mission & Vision Section */}
+        {missionVisionData && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mt-24 mb-24"
+          >
+            <div className="text-center mb-12">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                className="inline-block mb-4"
+              >
+                <span className="px-4 py-2 rounded-full bg-white/60 backdrop-blur-sm text-sm font-semibold bg-gradient-to-r from-green-600 via-red-600 to-[#800000]/90 bg-clip-text text-transparent">
+                  {missionVisionData.mission_and_vision_header}
+                </span>
+              </motion.div>
+
+              <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                <span className="bg-gradient-to-r from-yellow-600 via-red-600 to-red-900 bg-clip-text text-transparent">
+                  {missionVisionData.mission_and_vision_title}
+                </span>
+              </h2>
+
+              {missionVisionData.mission_and_vision_description && (
+                <p className="text-lg text-gray-700 max-w-3xl mx-auto">
+                  {missionVisionData.mission_and_vision_description}
+                </p>
+              )}
+            </div>
+
+            <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+              {/* Mission Card */}
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
+                whileHover={{ scale: 1.08 }}
+                className="bg-gradient-to-br from-yellow-500 via-red-600 to-[#800000]/90 text-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 p-8 md:p-10"
+              >
+                <div className="mb-6 inline-flex items-center justify-center w-16 h-16 rounded-xl backdrop-blur-sm bg-white/20">
+                  <Target className="w-8 h-8 text-orange-200" />
+                </div>
+                <h3 className="text-3xl font-bold mb-4">Our Mission</h3>
+                <p className="text-lg text-orange-100 leading-relaxed">
+                  {missionVisionData.mission_content}
+                </p>
+              </motion.div>
+
+              {/* Vision Card */}
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
+                whileHover={{ scale: 1.08 }}
+                className="bg-gradient-to-br from-yellow-500 via-red-600 to-[#800000]/90 text-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 p-8 md:p-10"
+              >
+                <div className="mb-6 inline-flex items-center justify-center w-16 h-16 rounded-xl backdrop-blur-sm bg-white/20">
+                  <Globe className="w-8 h-8 text-orange-200" />
+                </div>
+                <h3 className="text-3xl font-bold mb-4">Our Vision</h3>
+                <p className="text-lg text-red-100 leading-relaxed">
+                  {missionVisionData.vision_content}
+                </p>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Mission & Vision Section */}
         {missionVisionData && (

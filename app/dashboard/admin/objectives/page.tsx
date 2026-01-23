@@ -168,6 +168,7 @@ export default function ObjectivesPage() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify(payload),
       })
 
