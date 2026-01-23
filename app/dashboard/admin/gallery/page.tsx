@@ -37,7 +37,6 @@ export default function AdminGalleryPage() {
       setLoading(true)
       const res = await fetch("/api/galleries", { credentials: "include" })
       const data = await res.json()
-      setGalleries(data.data ?? data)
     } catch {
       toast({ variant: "destructive", title: "Failed to load gallery" })
     } finally {

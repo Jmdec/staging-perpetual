@@ -17,7 +17,6 @@ import {
   Settings,
   Menu,
   X,
-  Camera,
   Video,
 } from "lucide-react";
 import { authClient } from "@/lib/auth";
@@ -113,9 +112,8 @@ export default function AdminSidebar({
 
       {/* Scrollable Content */}
       <div
-        className={`h-full overflow-y-auto overflow-x-hidden ${
-          isCollapsed ? "py-8 px-4" : "py-8 px-8"
-        } flex flex-col min-h-full`}
+        className={`h-full overflow-y-auto overflow-x-hidden ${isCollapsed ? "py-8 px-4" : "py-8 px-8"
+          } flex flex-col min-h-full`}
         style={{
           scrollbarWidth: "thin",
           scrollbarColor: "#eda909b0 #992f2f",
@@ -123,9 +121,8 @@ export default function AdminSidebar({
       >
         {/* Logo Section */}
         <div
-          className={`flex items-center gap-2 mb-4 py-3 ${
-            isCollapsed ? "justify-center" : ""
-          }`}
+          className={`flex items-center gap-2 mb-4 py-3 ${isCollapsed ? "justify-center" : ""
+            }`}
         >
           <div
             className="w-10 h-10 rounded-full
@@ -138,6 +135,7 @@ export default function AdminSidebar({
               alt="Perpetual Village Logo"
               className="w-10 h-10 rounded-full object-cover"
             />
+            
           </div>
           {!isCollapsed && (
             <div>
@@ -147,60 +145,59 @@ export default function AdminSidebar({
           )}
         </div>
 
-        {/* Main Navigation */}
-        <nav className="space-y-1 flex-1 py-2 border-t border-white/20">
-          {navigationItems.map((item, index) => {
-            const active = isActive(item.path);
+      {/* Main Navigation */}
+      <nav className="space-y-1 flex-1 py-2 border-t border-white/20">
+        {navigationItems.map((item, index) => {
+          const active = isActive(item.path);
 
-            return (
-              <div key={index} className="group">
-                <button
-                  onClick={() => router.push(item.path)}
-                  className={`w-full flex items-center gap-2 px-3 py-3 rounded-lg text-left transition-colors text-sm
+          return (
+            <div key={index} className="group">
+              <button
+                onClick={() => router.push(item.path)}
+                className={`w-full flex items-center gap-2 px-3 py-3 rounded-lg text-left transition-colors text-sm
                     ${isCollapsed ? "justify-center" : ""}
-                    ${
-                      active
-                        ? "bg-white/20 font-semibold shadow-lg"
-                        : "hover:bg-white/10"
-                    }`}
-                >
-                  <item.icon size={16} />
-                  {!isCollapsed && <span>{item.label}</span>}
-                </button>
+                    ${active
+                    ? "bg-white/20 font-semibold shadow-lg"
+                    : "hover:bg-white/10"
+                  }`}
+              >
+                <item.icon size={16} />
+                {!isCollapsed && <span>{item.label}</span>}
+              </button>
 
-                {/* Collapsed Flyout */}
-                {isCollapsed && (
-                  <div className="absolute left-full w-44 -translate-y-1/2 -m-5 px-3 py-2 -ml-2 bg-emerald-600 text-white text-xs font-semibold rounded-md shadow-xl opacity-0 translate-x-2 invisible pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 group-hover:visible group-hover:pointer-events-auto transition-all duration-200 z-[9999]">
-                    {item.label}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </nav>
+              {/* Collapsed Flyout */}
+              {isCollapsed && (
+                <div className="absolute left-full w-44 -translate-y-1/2 -m-5 px-3 py-2 -ml-2 bg-emerald-600 text-white text-xs font-semibold rounded-md shadow-xl opacity-0 translate-x-2 invisible pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 group-hover:visible group-hover:pointer-events-auto transition-all duration-200 z-[9999]">
+                  {item.label}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </nav>
 
-        {/* Logout */}
-        <div className="py-6 border-t border-white/20">
-          <button
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            className={`w-full flex items-center gap-2 px-3 py-3 rounded-lg hover:bg-red-500/20 transition-colors text-sm
+      {/* Logout */}
+      <div className="py-6 border-t border-white/20">
+        <button
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className={`w-full flex items-center gap-2 px-3 py-3 rounded-lg hover:bg-red-500/20 transition-colors text-sm
               ${isCollapsed ? "justify-center" : ""}`}
-          >
-            {isLoggingOut ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                {!isCollapsed && <span>Logging out...</span>}
-              </>
-            ) : (
-              <>
-                <LogOut size={16} />
-                {!isCollapsed && <span>Logout</span>}
-              </>
-            )}
-          </button>
-        </div>
+        >
+          {isLoggingOut ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              {!isCollapsed && <span>Logging out...</span>}
+            </>
+          ) : (
+            <>
+              <LogOut size={16} />
+              {!isCollapsed && <span>Logout</span>}
+            </>
+          )}
+        </button>
       </div>
-    </aside>
+    </div>
+    </aside >
   );
 }
