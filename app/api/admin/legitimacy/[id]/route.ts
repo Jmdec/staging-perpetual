@@ -4,9 +4,9 @@ import { cookies } from "next/headers"
 /* ===================== POST (UPDATE) ===================== */
 export async function POST(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = context.params
+  const { id } = await context.params
 
   if (!id || id === "undefined") {
     return NextResponse.json(
@@ -16,7 +16,7 @@ export async function POST(
   }
 
   const cookieStore = cookies()
-  const authToken = cookieStore.get("auth_token")
+  const authToken = (await cookieStore).get("auth_token")
 
   if (!authToken) {
     return NextResponse.json(
@@ -52,13 +52,13 @@ export async function POST(
 /* ===================== DELETE ===================== */
 export async function DELETE(
   _request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = context.params
+    const { id } = await context.params
 
     const cookieStore = cookies()
-    const authToken = cookieStore.get("auth_token")
+    const authToken = (await cookieStore).get("auth_token")
 
     if (!authToken) {
       return NextResponse.json(

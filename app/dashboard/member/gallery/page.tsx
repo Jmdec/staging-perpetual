@@ -16,8 +16,8 @@ interface GalleryItem {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
-const getImageUrl = (path?: string | null) => {
-  if (!path) return undefined
+const getImageUrl = (path?: string | null): string => {
+  if (!path) return "/placeholder.png" // Provide a fallback image
   if (path.startsWith("http")) return path
   return `${API_BASE}${path.startsWith("/") ? "" : "/"}${path}`
 }

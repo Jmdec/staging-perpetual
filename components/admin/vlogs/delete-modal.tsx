@@ -4,19 +4,20 @@ import { useState } from "react"
 import { useToast } from "@/components/ui/use-toast"
 
 interface Vlog {
-  id?: number
+  id: number
   title: string
   category: string
   description?: string
   content: string
   date: string
   is_active: boolean
+  video?: File | string
 }
 
 interface Props {
   isOpen: boolean
   itemName: string
-  vlogId: Vlog
+  vlogId: Vlog | null
   onClose: () => void
   onDeleted: () => void
 }
@@ -25,7 +26,7 @@ export function AdminDeleteVlogsModal({ isOpen, itemName, vlogId, onClose, onDel
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
 
-  if (!isOpen) return null
+  if (!isOpen || !vlogId) return null
 
   const handleConfirm = async () => {
     try {

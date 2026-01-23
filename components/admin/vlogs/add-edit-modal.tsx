@@ -11,7 +11,7 @@ interface Vlog {
   description?: string
   content: string
   date: string
-  is_active: boolean
+  is_active: boolean | string | number // Allow multiple types from API
   video?: File | string
   poster?: File | string
 }
@@ -44,19 +44,29 @@ export default function AdminVlogsModal({ isOpen, mode, initialData, onClose, on
   const [progress, setProgress] = useState(0)
   const [poster, setPoster] = useState<File | null>(null)
 
+  // Helper function to normalize is_active value
+  const normalizeIsActive = (value: boolean | string | number): boolean => {
+    if (typeof value === "boolean") return value
+    if (typeof value === "string") return value === "1" || value.toLowerCase() === "true"
+    if (typeof value === "number") return value === 1
+    return false
+  }
+
   useEffect(() => {
     if (isOpen) {
       if (mode === "edit" && initialData) {
         setForm({
           ...initialData,
-          is_active: initialData.is_active === "1" || initialData.is_active === true,
+          is_active: normalizeIsActive(initialData.is_active),
         })
       } else {
         setForm(defaultForm)
       }
       setVideo(null)
+      setPoster(null)
       setProgress(0)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, mode, initialData])
 
   if (!isOpen) return null
@@ -82,7 +92,7 @@ export default function AdminVlogsModal({ isOpen, mode, initialData, onClose, on
         formData.append("category", form.category)
         formData.append("date", form.date)
         formData.append("content", form.content)
-        formData.append("is_active", form.is_active ? "1" : "0")
+        formData.append("is_active", normalizeIsActive(form.is_active) ? "1" : "0")
         if (form.description) formData.append("description", form.description)
         if (poster) {
           formData.append("poster", poster)
@@ -122,11 +132,12 @@ export default function AdminVlogsModal({ isOpen, mode, initialData, onClose, on
     formData.append("category", form.category)
     formData.append("date", form.date)
     formData.append("content", form.content)
-    formData.append("is_active", form.is_active ? "1" : "0")
+    formData.append("is_active", normalizeIsActive(form.is_active) ? "1" : "0")
     if (form.description) formData.append("description", form.description)
     if (poster) {
       formData.append("poster", poster)
     }
+    
     const xsrfCookie = document.cookie
       .split("; ")
       .find((c) => c.startsWith("XSRF-TOKEN="))
@@ -193,8 +204,8 @@ export default function AdminVlogsModal({ isOpen, mode, initialData, onClose, on
     }
   }
 
-  const getVideoUrl = (videoUrl?: string) => {
-    if (!videoUrl) return ""
+  const getVideoUrl = (videoUrl?: string): string => {
+    if (!videoUrl) return "/placeholder.png"
     if (videoUrl.startsWith("http://") || videoUrl.startsWith("https://")) {
       return videoUrl
     }
@@ -203,7 +214,9 @@ export default function AdminVlogsModal({ isOpen, mode, initialData, onClose, on
     }
     return `${process.env.NEXT_PUBLIC_IMAGE_URL}/${videoUrl}`
   }
+
   console.log("Initial video:", initialData)
+
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 sm:p-6">
       <div
@@ -253,42 +266,59 @@ export default function AdminVlogsModal({ isOpen, mode, initialData, onClose, on
           />
 
           {/* Poster upload */}
-          <input
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            onChange={(e) => setPoster(e.target.files?.[0] || null)}
-            className="text-sm sm:text-base"
-          />
-          {mode === "edit" && initialData?.poster && !poster && (
-            <div className="mb-2">
-              <p className="text-sm text-gray-600">Current poster:</p>
-              <img src={getVideoUrl(initialData.poster)} alt="Poster" className="w-full max-h-48 rounded-lg border object-cover" />
-            </div>
-          )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Poster Image</label>
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={(e) => setPoster(e.target.files?.[0] || null)}
+              className="text-sm sm:text-base"
+            />
+            {mode === "edit" && initialData?.poster && !poster && (
+              <div className="mt-2">
+                <p className="text-sm text-gray-600">Current poster:</p>
+                <img 
+                  src={getVideoUrl(typeof initialData.poster === 'string' ? initialData.poster : '')} 
+                  alt="Poster" 
+                  className="w-full max-h-48 rounded-lg border object-cover mt-1" 
+                />
+              </div>
+            )}
+          </div>
 
           {/* Video upload */}
-          <input
-            type="file"
-            accept="video/mp4,video/mov,video/avi,video/webm"
-            onChange={(e) => setVideo(e.target.files?.[0] || null)}
-            className="text-sm sm:text-base"
-          />
-          {mode === "edit" && initialData?.video && !video && (
-            <div className="mb-2">
-              <p className="text-sm text-gray-600">Current video:</p>
-              <video src={getVideoUrl(initialData.video)} controls className="w-full max-h-64 rounded-lg border" />
-            </div>
-          )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Video File</label>
+            <input
+              type="file"
+              accept="video/mp4,video/mov,video/avi,video/webm"
+              onChange={(e) => setVideo(e.target.files?.[0] || null)}
+              className="text-sm sm:text-base"
+            />
+            {mode === "edit" && initialData?.video && !video && (
+              <div className="mt-2">
+                <p className="text-sm text-gray-600">Current video:</p>
+                <video 
+                  src={getVideoUrl(typeof initialData.video === 'string' ? initialData.video : '')} 
+                  controls 
+                  className="w-full max-h-64 rounded-lg border mt-1" 
+                />
+              </div>
+            )}
+          </div>
 
           {/* Status */}
-          <select
-            className="w-full border rounded-lg px-3 py-2 text-sm sm:text-base"
-            value={form.is_active ? "1" : "0"}
-            onChange={(e) => setForm({ ...form, is_active: e.target.value === "1" })}
-          >
-            <option value="1">Active</option>
-            <option value="0">Inactive</option>
-          </select>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select
+              className="w-full border rounded-lg px-3 py-2 text-sm sm:text-base"
+              value={normalizeIsActive(form.is_active) ? "1" : "0"}
+              onChange={(e) => setForm({ ...form, is_active: e.target.value === "1" })}
+            >
+              <option value="1">Active</option>
+              <option value="0">Inactive</option>
+            </select>
+          </div>
         </div>
 
         {/* Actions */}

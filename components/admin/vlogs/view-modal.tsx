@@ -7,11 +7,12 @@ interface Vlog {
   title: string
   category: string
   description?: string
-  is_active: string
+  is_active: boolean
   date: string
   created_at: string
-  video?: string
+  video?: string | File  // Add File type here
   poster?: string
+  content: string
 }
 
 interface Props {
@@ -23,8 +24,15 @@ interface Props {
 export default function ViewVlogsModal({ isOpen, selectedItem, onClose }: Props) {
   if (!isOpen || !selectedItem) return null
 
-  const getVideoUrl = (videoUrl?: string) => {
+  const getVideoUrl = (videoUrl?: string | File) => {  // Update parameter type
     if (!videoUrl) return ""
+    
+    // Handle File objects
+    if (videoUrl instanceof File) {
+      return URL.createObjectURL(videoUrl)
+    }
+    
+    // Handle string URLs
     if (videoUrl.startsWith("http://") || videoUrl.startsWith("https://")) {
       return videoUrl
     }
@@ -70,14 +78,13 @@ export default function ViewVlogsModal({ isOpen, selectedItem, onClose }: Props)
             <p className="text-gray-600 mt-1">{selectedItem.description || "-"}</p>
           </div>
 
-          {selectedItem.video && (
+          {selectedItem.poster && (
             <div className="mt-4">
               <span className="font-medium">Poster:</span>
-              <img src={getVideoUrl(selectedItem.poster)} className="w-full max-h-64 rounded-lg border mt-1" />
+              <img src={getVideoUrl(selectedItem.poster)} alt="Video poster" className="w-full max-h-64 rounded-lg border mt-1" />
             </div>
           )}
 
-          {/* Video player */}
           {selectedItem.video && (
             <div className="mt-4">
               <span className="font-medium">Video:</span>

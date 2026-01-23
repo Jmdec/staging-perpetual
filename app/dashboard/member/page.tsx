@@ -86,15 +86,6 @@ const juantapAPI = {
     }),
 }
 
-const BUSINESS_PARTNERS = [
-  { name: "Perpetual Help System DALTA", logo: "/partners/perpetual.png" },
-  { name: "Barangay Council", logo: "/partners/barangay.png" },
-  { name: "Local Business Association", logo: "/partners/lba.png" },
-  { name: "Community Health Center", logo: "/partners/health.png" },
-  { name: "Youth Development Office", logo: "/partners/youth.png" },
-  { name: "Public Safety Office", logo: "/partners/safety.png" },
-]
-
 export default function MemberDashboard() {
   const router = useRouter()
   const { user: authUser, loading: authLoading } = useAuth(true)
@@ -118,6 +109,7 @@ export default function MemberDashboard() {
   useEffect(() => {
     fetchUser()
     fetchGalleries()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const fetchGalleries = async () => {
@@ -127,11 +119,12 @@ export default function MemberDashboard() {
       const data = await res.json()
       setGalleries(data.data ?? data)
     } catch {
-      toast({ variant: "destructive", title: "Failed to load gallery" })
+      toast.error("Failed to load gallery")
     } finally {
       setLoading(false)
     }
   }
+
   const fetchUser = async () => {
     try {
       setLoading(true)
@@ -140,7 +133,6 @@ export default function MemberDashboard() {
       console.log("User data received:", res)
       setUser(res.user)
 
-      // Fetch JuanTap profile separately since backend doesn't include it
       await fetchJuanTapProfileData()
     } catch (err: any) {
       console.error("Error fetching user:", err)
@@ -160,7 +152,6 @@ export default function MemberDashboard() {
       }
     } catch (err: any) {
       console.log("No existing JuanTap profile found")
-      // It's okay if this fails - user just doesn't have a profile yet
     }
   }
 
@@ -210,8 +201,10 @@ export default function MemberDashboard() {
 
       await fetchJuanTapProfileData()
       setShowModal(false)
+      toast.success(hasJuanTapProfile ? "Profile updated successfully" : "Profile created successfully")
     } catch (err: any) {
       setFormError(err.message)
+      toast.error(err.message)
     } finally {
       setFormLoading(false)
     }
@@ -229,15 +222,17 @@ export default function MemberDashboard() {
       await juantapAPI.delete()
       await fetchJuanTapProfileData()
       setShowModal(false)
+      toast.success("Profile deleted successfully")
     } catch (err: any) {
       setFormError(err.message)
+      toast.error(err.message)
     } finally {
       setFormLoading(false)
     }
   }
 
-  const getImageUrl = (videoUrl?: string) => {
-    if (!videoUrl) return ""
+  const getImageUrl = (videoUrl?: string): string => {
+    if (!videoUrl) return "/placeholder.png"
     if (videoUrl.startsWith("http://") || videoUrl.startsWith("https://")) {
       return videoUrl
     }
@@ -278,36 +273,34 @@ export default function MemberDashboard() {
   return (
     <div className="lg:py-10">
       <MemberLayout>
-        {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">
-            <span className="bg-gradient-to-r from-emerald-600 to-orange-500 bg-clip-text text-transparent">Welcome, {user?.name || "Member"}!</span>
+            <span className="bg-gradient-to-r from-emerald-600 to-orange-500 bg-clip-text text-transparent">
+              Welcome, {user?.name || "Member"}!
+            </span>
           </h1>
           <p className="text-gray-600 text-lg">Perpetual Help College Dashboard</p>
         </div>
 
-        {/* Announcements & News Section */}
         <div className="grid grid-cols-1 gap-4 mb-8">
           <AnnouncementsSection />
           <NewsSection />
         </div>
 
-        {/* JuanTap Profile & Gallery Section */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {/* JuanTap Profile Card */}
           <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition">
-            {/* Header */}
             <div className="flex items-center gap-4 mb-5">
-              <div className="w-11 h-11 bg-orange-500 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow">JT</div>
+              <div className="w-11 h-11 bg-orange-500 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow">
+                JT
+              </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-base font-semibold text-gray-800">JuanTap Profile</h3>
-                <p className="text-sm text-gray-500 truncate">Digital identity & smart profile</p>
+                <p className="text-sm text-gray-500 truncate">Digital identity &amp; smart profile</p>
               </div>
             </div>
 
             {hasJuanTapProfile ? (
               <>
-                {/* QR & Profile URL */}
                 {(juantapProfile?.profile_url || juantapProfile?.qr_code) && (
                   <div className="flex gap-4 p-3 mb-4">
                     <div className="flex-1 justify-center text-center">
@@ -336,7 +329,6 @@ export default function MemberDashboard() {
                   </div>
                 )}
 
-                {/* Action */}
                 <button
                   onClick={openModal}
                   className="w-full py-2.5 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition font-medium text-sm"
@@ -363,7 +355,6 @@ export default function MemberDashboard() {
             )}
           </div>
 
-          {/* Gallery Section */}
           <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-base font-semibold text-gray-800">Gallery</h2>
@@ -376,7 +367,6 @@ export default function MemberDashboard() {
           </div>
         </div>
 
-        {/* JUANTAP MODAL */}
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
             <motion.div
@@ -385,19 +375,22 @@ export default function MemberDashboard() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="bg-white w-full max-w-xl rounded-2xl shadow-xl"
             >
-              {/* Header */}
               <div className="flex items-center justify-between px-6 py-4 border-b">
-                <h2 className="text-xl font-bold text-gray-800">{hasJuanTapProfile ? "Update JuanTap Profile" : "Add Existing JuanTap Profile"}</h2>
+                <h2 className="text-xl font-bold text-gray-800">
+                  {hasJuanTapProfile ? "Update JuanTap Profile" : "Add Existing JuanTap Profile"}
+                </h2>
                 <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700">
                   ✕
                 </button>
               </div>
 
-              {/* Form */}
               <form onSubmit={handleSubmit} className="p-6 space-y-5">
-                {formError && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">{formError}</div>}
+                {formError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+                    {formError}
+                  </div>
+                )}
 
-                {/* Profile URL */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">JuanTap Profile URL</label>
                   <input
@@ -409,10 +402,8 @@ export default function MemberDashboard() {
                   />
                 </div>
 
-                {/* QR Upload */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Upload QR Code</label>
-
                   <input type="file" accept="image/*" onChange={handleQrUpload} className="block w-full text-sm" />
 
                   {qrPreview && (
@@ -422,9 +413,12 @@ export default function MemberDashboard() {
                   )}
                 </div>
 
-                {/* Actions */}
                 <div className="flex gap-3 pt-4">
-                  <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-4 py-3 border rounded-xl hover:bg-gray-50">
+                  <button
+                    type="button"
+                    onClick={() => setShowModal(false)}
+                    className="flex-1 px-4 py-3 border rounded-xl hover:bg-gray-50"
+                  >
                     Cancel
                   </button>
                   {hasJuanTapProfile && (

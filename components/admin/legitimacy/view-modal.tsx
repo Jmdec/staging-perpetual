@@ -10,7 +10,7 @@ interface User {
 }
 
 interface Signatory {
-  id: number
+  id?: number
   name: string
   role?: string
   signed_date?: string
@@ -192,7 +192,7 @@ export default function ViewLegitimacyModal({ isOpen, selectedItem, onClose }: V
 
               <div className="space-y-3">
                 {selectedItem.signatories.map((signatory, idx) => (
-                  <div key={signatory.id} className="p-3 border rounded-md bg-gray-50">
+                  <div key={signatory.id ?? idx} className="p-3 border rounded-md bg-gray-50">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 space-y-1">
                         <p className="font-medium text-gray-900">{signatory.name}</p>
