@@ -84,7 +84,7 @@ export default function NewsPage() {
 
   return (
     <MemberLayout>
-      <div className="h-screen overflow-auto bg-gray-50">
+      <div className="h-screen bg-gray-50">
         {/* HEADER */}
         <header className="bg-linear-to-r from-orange-600 to-orange-500 text-white px-4 sm:px-6 py-3 sm:py-4 sticky top-0 z-10 shadow-md">
           <div className="flex items-center justify-between">

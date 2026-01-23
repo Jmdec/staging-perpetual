@@ -105,7 +105,7 @@ export default function MemberBusinessModal({ isOpen, mode, initialData, onClose
 
       if (file) payload.append("photo", file)
 
-      const url = mode === "create" ? "/api/business-partners" : `/api/business-partners/${formData.id}`
+      const url = mode === "create" ? "/api/business-partners/" : `/api/business-partners/${formData.id}`
       const method = mode === "create" ? "POST" : "PUT"
 
       const res = await fetch(url, {
