@@ -16,27 +16,27 @@ async function getAuthToken() {
 
 export async function GET(request: NextRequest) {
     try {
-        console.log("[Community API] GET - Starting request")
+        console.log("[Objectives API] GET - Starting request")
         
         const token = await getAuthToken()
-        console.log("[Community API] GET - Token exists:", !!token)
+        console.log("[Objectives API] GET - Token exists:", !!token)
 
-        if (!token) {
-            console.log("[Community API] GET - No auth token found")
-            return NextResponse.json(
-                { success: false, message: "Unauthorized" },
-                { status: 401 }
-            )
+        // Use public endpoint for unauthenticated requests, admin endpoint for authenticated
+        const endpoint = token ? `${API_URL}/objectives/show` : `${API_URL}/objectives`
+        
+        console.log("[Objectives API] GET - Fetching from:", endpoint)
+
+        const headers: any = {
+            Accept: "application/json",
+        }
+        
+        if (token) {
+            headers.Authorization = `Bearer ${token}`
         }
 
-        console.log("[Community API] GET - Fetching from:", `${API_URL}/objectives`)
-
-        const response = await fetch(`${API_URL}/objectives`, {
+        const response = await fetch(endpoint, {
             method: "GET",
-            headers: {
-                Accept: "application/json",
-                Authorization: `Bearer ${token}`,
-            },
+            headers,
         })
 
         const responseText = await response.text()

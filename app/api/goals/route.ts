@@ -10,25 +10,25 @@ async function getAuthToken() {
 
 export async function GET(request: NextRequest) {
   try {
-    console.log("[Goals API] GET - Fetching from:", `${API_URL}/goals/show`)
-
     const token = await getAuthToken()
+    
+    // Use public endpoint for unauthenticated requests, admin endpoint for authenticated
+    const endpoint = token ? `${API_URL}/goals/show` : `${API_URL}/goals`
+    
+    console.log("[Goals API] GET - Fetching from:", endpoint)
 
-    if (!token) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      )
+    const headers: any = {
+      Accept: "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    }
+    
+    if (token) {
+      headers.Authorization = `Bearer ${token}`
     }
 
-    // Changed from /goals to /goals/show
-    const response = await fetch(`${API_URL}/goals/show`, {
+    const response = await fetch(endpoint, {
       method: "GET",
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${token}`,
-        "X-Requested-With": "XMLHttpRequest",
-      },
+      headers,
       cache: "no-store",
     })
 
