@@ -3,503 +3,447 @@
 import { useEffect, useState } from "react"
 import {
   Users,
-  FileText,
-  Heart,
-  TrendingUp,
+  FileCheck,
   Clock,
   CheckCircle,
   XCircle,
   AlertCircle,
   Calendar,
-  Eye,
-  FileCheck,
-  Building,
-  Briefcase,
-  CreditCard,
-  HeartPulse,
-  Shield,
-  Flame,
-  Phone,
   BarChart3,
   Activity,
-  TrendingDown
+  TrendingUp,
+  TrendingDown,
+  Newspaper,
+  Bell,
 } from "lucide-react"
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from "recharts"
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts"
 import AdminLayout from "@/components/adminLayout"
-import { useAuth } from "@/hooks/useAuth"
+
+/* ================= TYPES ================= */
 
 interface DashboardStats {
   totalUsers: number
-  totalNews: number
-  totalAssistance: number
-  pendingAssistance: number
-  approvedAssistance: number
-  rejectedAssistance: number
-  publishedNews: number
-  draftNews: number
-  totalApplications: number
-  buildingPermits: number
-  businessPermits: number
-  healthCertificates: number
-  cedula: number
-  barangayClearance: number
-  policeClearance: number
-  ambulanceRequests: number
-  reports: number
+  activeUsers: number
+  issuedCertificates: number
+  pendingApprovals: number
 }
 
-interface RecentActivity {
+interface User {
   id: number
-  type: string
-  title: string
-  date: string
-  status: string
+  status: "pending" | "approved" | "rejected" | "deactivated"
+  created_at: string
 }
 
-export default function EnhancedAdminDashboard() {
-  const { user, loading: authLoading } = useAuth(true)
-  const [stats, setStats] = useState<DashboardStats>({
-    totalUsers: 0,
-    totalNews: 0,
-    totalAssistance: 0,
-    pendingAssistance: 0,
-    approvedAssistance: 0,
-    rejectedAssistance: 0,
-    publishedNews: 0,
-    draftNews: 0,
-    totalApplications: 0,
-    buildingPermits: 0,
-    businessPermits: 0,
-    healthCertificates: 0,
-    cedula: 0,
-    barangayClearance: 0,
-    policeClearance: 0,
-    ambulanceRequests: 0,
-    reports: 0,
-  })
+interface Certificate {
+  type: string
+  status: string
+  created_at: string
+}
 
-  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([])
+interface News {
+  id: number
+  status: "draft" | "published" | "archived"
+  category: string
+  created_at: string
+}
+
+interface Announcement {
+  id: number
+  category: string
+  is_active: boolean
+  created_at: string
+}
+
+/* ================= COMPONENT ================= */
+
+export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
 
-  // Mock data for charts (replace with real API data)
-  const applicationTrendData = [
-    { month: "Jun", applications: 45, approved: 38, rejected: 7 },
-    { month: "Jul", applications: 52, approved: 45, rejected: 7 },
-    { month: "Aug", applications: 68, approved: 60, rejected: 8 },
-    { month: "Sep", applications: 71, approved: 63, rejected: 8 },
-    { month: "Oct", applications: 85, approved: 75, rejected: 10 },
-    { month: "Nov", applications: 92, approved: 82, rejected: 10 },
-  ]
+  const [stats, setStats] = useState<DashboardStats>({
+    totalUsers: 0,
+    activeUsers: 0,
+    issuedCertificates: 0,
+    pendingApprovals: 0,
+  })
 
-  const serviceDistributionData = [
-    { name: "Medical Assistance", value: stats.totalAssistance || 35, color: "#e70000" },
-    { name: "Building Permits", value: stats.buildingPermits || 25, color: "#f56600" },
-    { name: "Business Permits", value: stats.businessPermits || 20, color: "#edb200" },
-    { name: "Health Certificates", value: stats.healthCertificates || 30, color: "#00d74f" },
-    { name: "Cedula", value: stats.cedula || 40, color: "#005ef4" },
-    { name: "Clearances", value: (stats.barangayClearance || 15) + (stats.policeClearance || 10), color: "#4300df" },
-  ]
+  /* ===== REAL CHART STATES ===== */
 
-  const weeklyActivityData = [
-    { day: "Mon", activity: 34 },
-    { day: "Tue", activity: 45 },
-    { day: "Wed", activity: 52 },
-    { day: "Thu", activity: 48 },
-    { day: "Fri", activity: 61 },
-    { day: "Sat", activity: 28 },
-    { day: "Sun", activity: 15 },
-  ]
+  const [certificateChart, setCertificateChart] = useState<any[]>([])
+  const [userStatusChart, setUserStatusChart] = useState<any[]>([])
+  const [newsPieChart, setNewsPieChart] = useState<any[]>([])
+  const [weeklyRegistrationChart, setWeeklyRegistrationChart] = useState<any[]>([])
+  const [announcementCategoryChart, setAnnouncementCategoryChart] = useState<any[]>([])
 
   useEffect(() => {
-    if (!authLoading && user) {
-      fetchDashboardData()
-    }
-  }, [authLoading, user])
+    fetchDashboardData()
+  }, [])
+
+  /* ================= FETCH REAL DATA ================= */
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true)
 
-      const endpoints = [
-        "/api/admin/news",
-        "/api/medical-assistance",
-        "/api/building-permit",
-        "/api/business-permit",
-        "/api/health-certificate",
-        "/api/cedula",
-        "/api/barangay-clearance",
-        "/api/police-clearance",
-        "/api/emergency/ambulance",
-        "/api/reports",
-        "/api/users"
-      ]
+      // Fetch all data in parallel
+      const [usersRes, certificatesRes, newsRes, announcementsRes] = await Promise.all([
+        fetch("/api/users?per_page=1000", { credentials: "include" }),
+        fetch("/api/certificates?per_page=1000", { credentials: "include" }),
+        fetch("/api/admin/news?per_page=1000", { credentials: "include" }),
+        fetch("/api/announcements?per_page=1000", { credentials: "include" }),
+      ])
 
-      const responses = await Promise.allSettled(
-        endpoints.map(endpoint =>
-          fetch(endpoint, { credentials: "include" }).then(res => res.ok ? res.json() : null)
-        )
+      // Parse responses
+      const usersJson = await usersRes.json()
+      const certificatesJson = await certificatesRes.json()
+      const newsJson = await newsRes.json()
+      const announcementsJson = await announcementsRes.json()
+
+      // Extract data arrays
+      const users: User[] = usersJson.success ? (usersJson.data?.data || []) : []
+      const certificates: Certificate[] = certificatesJson.success
+        ? (certificatesJson.data?.data || [])
+        : []
+      const news: News[] = newsJson.success ? (newsJson.data?.data || []) : []
+      const announcements: Announcement[] = announcementsJson.success
+        ? (announcementsJson.data?.data || [])
+        : []
+
+      /* ===== USERS STATS ===== */
+      const approvedUsers = users.filter((u) => u.status === "approved").length
+      const pendingUsers = users.filter((u) => u.status === "pending").length
+      const rejectedUsers = users.filter((u) => u.status === "rejected").length
+      const deactivatedUsers = users.filter((u) => u.status === "deactivated").length
+
+      setStats({
+        totalUsers: users.length,
+        activeUsers: approvedUsers,
+        issuedCertificates: certificates.filter((c) => c.status === "issued").length,
+        pendingApprovals: pendingUsers,
+      })
+
+      // User Status Chart
+      setUserStatusChart([
+        { name: "Pending", value: pendingUsers, color: "#f59e0b" },
+        { name: "Approved", value: approvedUsers, color: "#10b981" },
+        { name: "Rejected", value: rejectedUsers, color: "#ef4444" },
+        { name: "Deactivated", value: deactivatedUsers, color: "#6b7280" },
+      ])
+
+      /* ===== WEEKLY REGISTRATION ===== */
+      const weeklyMap: Record<string, number> = {
+        Mon: 0,
+        Tue: 0,
+        Wed: 0,
+        Thu: 0,
+        Fri: 0,
+        Sat: 0,
+        Sun: 0,
+      }
+
+      users.forEach((u) => {
+        const day = new Date(u.created_at).toLocaleDateString("en-US", { weekday: "short" })
+        if (weeklyMap[day] !== undefined) weeklyMap[day]++
+      })
+
+      setWeeklyRegistrationChart(
+        Object.entries(weeklyMap).map(([day, value]) => ({ day, value }))
       )
 
-      let newStats = { ...stats }
-      let activities: RecentActivity[] = []
+      /* ===== CERTIFICATE ISSUANCE BY TYPE ===== */
+      const certMap: Record<string, number> = {}
 
-      // Process News
-      if (responses[0].status === "fulfilled" && responses[0].value?.success) {
-        const newsData = responses[0].value.data
-        const published = newsData.data?.filter((n: any) => n.status === "published").length || 0
-        const draft = newsData.data?.filter((n: any) => n.status === "draft").length || 0
-        newStats.totalNews = newsData.total || newsData.data?.length || 0
-        newStats.publishedNews = published
-        newStats.draftNews = draft
-      }
+      certificates.forEach((c) => {
+        const type = c.type || "Other"
+        certMap[type] = (certMap[type] || 0) + 1
+      })
 
-      // Process Medical Assistance
-      if (responses[1].status === "fulfilled" && responses[1].value?.success) {
-        const responseData = responses[1].value.data
-        // Handle different response structures
-        const dataArray = responseData.data || responseData || []
+      setCertificateChart(
+        Object.entries(certMap)
+          .map(([name, value]) => ({ name, value }))
+          .sort((a, b) => b.value - a.value)
+          .slice(0, 10) // Top 10 certificate types
+      )
 
-        const pending = dataArray.filter((a: any) => a.status === "pending").length || 0
-        const approved = dataArray.filter((a: any) => a.status === "approved").length || 0
-        const rejected = dataArray.filter((a: any) => a.status === "rejected").length || 0
+      /* ===== NEWS & ANNOUNCEMENTS ===== */
+      const publishedNews = news.filter((n) => n.status === "published").length
+      const draftNews = news.filter((n) => n.status === "draft").length
+      const archivedNews = news.filter((n) => n.status === "archived").length
 
-        newStats.totalAssistance = responseData.total || dataArray.length || 0
-        newStats.pendingAssistance = pending
-        newStats.approvedAssistance = approved
-        newStats.rejectedAssistance = rejected
+      setNewsPieChart([
+        { name: "Published", value: publishedNews, color: "#10b981" },
+        { name: "Drafts", value: draftNews, color: "#6b7280" },
+        { name: "Archived", value: archivedNews, color: "#f59e0b" },
+      ])
 
-        // Add to recent activities
-        dataArray.slice(0, 3).forEach((a: any) => {
-          // Try multiple possible field names
-          const firstName = a.first_name || a.firstName || a.applicant_first_name || ""
-          const lastName = a.last_name || a.lastName || a.applicant_last_name || ""
-          const fullName = a.full_name || a.fullName || a.name || `${firstName} ${lastName}`.trim()
+      /* ===== ANNOUNCEMENT CATEGORIES ===== */
+      const announcementMap: Record<string, number> = {}
 
-          // Only add if we have a valid name
-          if (fullName && fullName !== "undefined undefined" && fullName.trim()) {
-            activities.push({
-              id: a.id,
-              type: "Medical Assistance",
-              title: fullName,
-              date: a.created_at || a.createdAt || a.date || new Date().toISOString(),
-              status: a.status || "pending",
-            })
-          }
-        })
-      }
+      announcements.forEach((a) => {
+        const category = a.category || "Other"
+        announcementMap[category] = (announcementMap[category] || 0) + 1
+      })
 
-      // Process Building Permits
-      if (responses[2].status === "fulfilled" && responses[2].value?.success) {
-        const data = responses[2].value.data
-        newStats.buildingPermits = data.total || data.data?.length || 0
-      }
-
-      // Process Reports
-      if (responses[9].status === "fulfilled" && responses[9].value?.success) {
-        const data = responses[9].value.data
-        newStats.reports = data.total || data.data?.length || 0
-      }
-
-      // Process Users
-      if (responses[10].status === "fulfilled" && responses[10].value?.success) {
-        const data = responses[10].value.data
-        newStats.totalUsers = data.total || data.data?.length || 0
-      }
-
-      // Calculate total applications
-      newStats.totalApplications =
-        newStats.totalAssistance +
-        newStats.buildingPermits +
-        newStats.businessPermits +
-        newStats.healthCertificates +
-        newStats.cedula +
-        newStats.barangayClearance +
-        newStats.policeClearance
-
-      setStats(newStats)
-      setRecentActivities(activities)
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error)
+      setAnnouncementCategoryChart(
+        Object.entries(announcementMap)
+          .map(([name, value]) => ({ name, value }))
+          .sort((a, b) => b.value - a.value)
+      )
+    } catch (err) {
+      console.error("Dashboard error:", err)
     } finally {
       setLoading(false)
     }
   }
 
-  const StatCard = ({ title, value, icon: Icon, color, trend, trendValue }: any) => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between mb-3">
-        <div className={`w-12 h-12 bg-${color}-100 rounded-lg flex items-center justify-center`}>
-          <Icon className={`w-6 h-6 text-${color}-600`} />
-        </div>
-        {trend && (
-          <div className={`flex items-center gap-1 ${trend === 'up' ? 'text-green-600/90' : 'text-red-600/90'}`}>
-            {trend === 'up' ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-            <span className="text-sm font-medium">{trendValue}%</span>
-          </div>
-        )}
-      </div>
-      <p className="text-sm text-gray-600 font-medium mb-1">{title}</p>
-      <p className="text-3xl font-bold text-gray-900">
-        {loading ? "..." : value.toLocaleString()}
-      </p>
-    </div>
-  )
+  /* ================= UI ================= */
 
-  if (authLoading) {
+  if (loading) {
     return (
-      <AdminLayout>
-        <div className="flex items-center justify-center h-full">
-          <div className="text-gray-600">Loading...</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading dashboard...</p>
         </div>
-      </AdminLayout>
+      </div>
     )
   }
 
   return (
     <AdminLayout>
-      <div className="h-full overflow-auto">
-        {/* Header */}
-        <div className="mb-5 px-6 py-4 bg-white border-b border-gray-200">
-          <h1 className="text-4xl font-bold mb-2">
-            <span className="bg-gradient-to-r from-emerald-600 to-orange-500 bg-clip-text text-transparent">
-              Welcome, {user?.name}!
-            </span>
-          </h1>
-          <p className="text-gray-600 text-lg">Perpetual Help College Dashboard</p>
-        </div>
-
-        <main className="px-6 py-6">
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Key Metrics Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard
-                title="Total Users"
-                value={stats.totalUsers}
-                icon={Users}
-                color="blue"
-                trend="up"
-                trendValue={12}
-              />
-              <StatCard
-                title="Active Members"
-                value={stats.totalApplications}
-                icon={FileCheck}
-                color="purple"
-                trend="up"
-                trendValue={8}
-              />
-              <StatCard
-                title="Issued Cerificates"
-                value={stats.totalAssistance}
-                icon={Heart}
-                color="red"
-                trend="up"
-                trendValue={15}
-              />
-              <StatCard
-                title="Pending Applications"
-                value={stats.pendingAssistance}
-                icon={Clock}
-                color="yellow"
-              />
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-orange-100 rounded-lg">
+              <BarChart3 className="w-6 h-6 text-orange-600" />
             </div>
-
-            {/* Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Application Trends */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-gray-900">Application Trends</h2>
-                  <BarChart3 className="w-5 h-5 text-gray-400" />
-                </div>
-                <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={applicationTrendData}>
-                    <defs>
-                      <linearGradient id="colorApplications" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#ff0000" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#ffff00b0" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="month" stroke="#9ca3af" fontSize={12} />
-                    <YAxis stroke="#9ca3af" fontSize={12} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: 'white',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '8px',
-                        fontSize: '12px'
-                      }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="applications"
-                      stroke="#ff0000"
-                      strokeWidth={2}
-                      fill="url(#colorApplications)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-
-              {/* Service Distribution */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-gray-900">Service Distribution</h2>
-                  <Activity className="w-5 h-5 text-gray-400" />
-                </div>
-                <div className="flex flex-col lg:flex-row items-center gap-4">
-                  <ResponsiveContainer width="100%" height={250}>
-                    <PieChart>
-                      <Pie
-                        data={serviceDistributionData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={false}
-                        outerRadius={90}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {serviceDistributionData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-
-                  {/* Legend */}
-                  <div className="flex flex-col gap-2 w-full lg:w-auto">
-                    {serviceDistributionData.map((entry, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <div
-                          className="w-3 h-3 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: entry.color }}
-                        />
-                        <span className="text-xs text-gray-700">{entry.name}</span>
-                        <span className="text-xs font-bold text-gray-900 ml-auto">{entry.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Weekly Activity */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-gray-900">Weekly Activity</h2>
-                <Calendar className="w-5 h-5 text-gray-400" />
-              </div>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={weeklyActivityData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="day" stroke="#9ca3af" fontSize={12} />
-                  <YAxis stroke="#9ca3af" fontSize={12} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'white',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      fontSize: '12px'
-                    }}
-                  />
-                  <Bar dataKey="activity" fill="#ab0000" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Bottom Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Recent Applications */}
-              <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-gray-900">Recent Applications</h2>
-                  <button className="text-sm text-orange-600 font-medium hover:text-orange-700">
-                    View All
-                  </button>
-                </div>
-                <div className="space-y-3">
-                  {loading ? (
-                    <div className="text-center py-8 text-gray-500">Loading...</div>
-                  ) : recentActivities.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      <p className="mb-2">No recent activities</p>
-                      <p className="text-xs">Medical assistance applications will appear here</p>
-                    </div>
-                  ) : (
-                    recentActivities.map((activity) => (
-                      <div
-                        key={activity.id}
-                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                      >
-                        <div className="flex items-center gap-3 flex-1">
-                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <Heart className="w-5 h-5 text-blue-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">{activity.title}</p>
-                            <p className="text-xs text-gray-500">{activity.type}</p>
-                          </div>
-                        </div>
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${activity.status === "pending"
-                              ? "bg-orange-100 text-orange-700"
-                              : activity.status === "approved"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-red-100 text-red-700"
-                            }`}
-                        >
-                          {activity.status}
-                        </span>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              {/* Status Overview */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                <h2 className="text-lg font-bold text-gray-900 mb-4">Status Overview</h2>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-5 h-5 text-orange-600" />
-                      <span className="text-sm font-medium text-gray-700">Pending</span>
-                    </div>
-                    <span className="text-lg font-bold text-gray-900">{stats.pendingAssistance}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-600" />
-                      <span className="text-sm font-medium text-gray-700">Approved</span>
-                    </div>
-                    <span className="text-lg font-bold text-gray-900">{stats.approvedAssistance}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <XCircle className="w-5 h-5 text-red-600" />
-                      <span className="text-sm font-medium text-gray-700">Rejected</span>
-                    </div>
-                    <span className="text-lg font-bold text-gray-900">{stats.rejectedAssistance}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 bg-gray-100 rounded-lg border-t-2 border-gray-300">
-                    <div className="flex items-center gap-2">
-                      <AlertCircle className="w-5 h-5 text-gray-600" />
-                      <span className="text-sm font-medium text-gray-700">Total</span>
-                    </div>
-                    <span className="text-lg font-bold text-gray-900">{stats.totalAssistance}</span>
-                  </div>
-                </div>
-              </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+              <p className="text-sm text-gray-500">Overview of system statistics</p>
             </div>
           </div>
-        </main>
+        </div>
       </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* ===== STATS CARDS ===== */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            title="Total Users"
+            value={stats.totalUsers}
+            icon={Users}
+            color="blue"
+            trend="+12%"
+          />
+          <StatCard
+            title="Active Users"
+            value={stats.activeUsers}
+            icon={CheckCircle}
+            color="green"
+            trend="+8%"
+          />
+          <StatCard
+            title="Issued Certificates"
+            value={stats.issuedCertificates}
+            icon={FileCheck}
+            color="purple"
+            trend="+15%"
+          />
+          <StatCard
+            title="Pending Approvals"
+            value={stats.pendingApprovals}
+            icon={Clock}
+            color="orange"
+            trend="-5%"
+          />
+        </div>
+
+        {/* ===== CHARTS ROW 1 ===== */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* User Status Breakdown */}
+          <ChartCard title="User Status Distribution" icon={Users}>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={userStatusChart}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  label
+                >
+                  {userStatusChart.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </ChartCard>
+
+          {/* News Status */}
+          <ChartCard title="News & Articles Status" icon={Newspaper}>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={newsPieChart}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  label
+                >
+                  {newsPieChart.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </ChartCard>
+        </div>
+
+        {/* ===== CHARTS ROW 2 ===== */}
+        <div className="grid grid-cols-1 gap-6">
+          {/* Weekly Registration */}
+          <ChartCard title="Weekly Registration Activity" icon={Calendar}>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={weeklyRegistrationChart}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="day" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="value" fill="#7c3aed" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartCard>
+
+          {/* Certificate Issuance */}
+          <ChartCard title="Certificate Issuance by Type" icon={FileCheck}>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={certificateChart}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="value" fill="#16a34a" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartCard>
+
+          {/* Announcement Categories */}
+          <ChartCard title="Announcements by Category" icon={Bell}>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={announcementCategoryChart}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="value" fill="#ea580c" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartCard>
+        </div>
+
+        {/* ===== ACTIVITY SUMMARY ===== */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <Activity className="w-5 h-5 text-orange-600" />
+            Quick Summary
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <SummaryItem
+              label="Total Registered Users"
+              value={stats.totalUsers}
+              description="All users in the system"
+            />
+            <SummaryItem
+              label="Approval Rate"
+              value={`${stats.totalUsers > 0 ? Math.round((stats.activeUsers / stats.totalUsers) * 100) : 0}%`}
+              description="Approved vs total users"
+            />
+            <SummaryItem
+              label="Pending Review"
+              value={stats.pendingApprovals}
+              description="Awaiting admin action"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
     </AdminLayout>
   )
 }
+
+/* ================= HELPER COMPONENTS ================= */
+
+const StatCard = ({ title, value, icon: Icon, color, trend }: any) => {
+  const colors: Record<string, string> = {
+    blue: "bg-blue-50 text-blue-600",
+    green: "bg-green-50 text-green-600",
+    purple: "bg-purple-50 text-purple-600",
+    orange: "bg-orange-50 text-orange-600",
+  }
+
+  const trendColors: Record<string, string> = {
+    positive: "text-green-600",
+    negative: "text-red-600",
+  }
+
+  const isPositive = trend && trend.startsWith("+")
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+      <div className="flex items-center justify-between mb-4">
+        <div className={`p-3 rounded-lg ${colors[color]}`}>
+          <Icon className="w-6 h-6" />
+        </div>
+        {trend && (
+          <div className={`flex items-center gap-1 text-sm font-medium ${isPositive ? trendColors.positive : trendColors.negative}`}>
+            {isPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+            {trend}
+          </div>
+        )}
+      </div>
+      <div>
+        <p className="text-3xl font-bold text-gray-900">{value}</p>
+        <p className="text-sm text-gray-600 mt-1">{title}</p>
+      </div>
+    </div>
+  )
+}
+
+const ChartCard = ({ title, icon: Icon, children }: any) => (
+  <div className="bg-white rounded-lg border border-gray-200 p-6">
+    <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+      <Icon className="w-5 h-5 text-orange-600" />
+      {title}
+    </h2>
+    {children}
+  </div>
+)
+
+const SummaryItem = ({ label, value, description }: any) => (
+  <div className="p-4 bg-gray-50 rounded-lg">
+    <p className="text-sm text-gray-600 mb-1">{label}</p>
+    <p className="text-2xl font-bold text-gray-900">{value}</p>
+    <p className="text-xs text-gray-500 mt-1">{description}</p>
+  </div>
+)

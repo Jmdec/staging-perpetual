@@ -31,19 +31,25 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
       ...(options.headers || {}),
     },
     ...options,
-  });
+  })
 
-  if (res.status === 401) {
-    throw new Error("Unauthorized");
+  const text = await res.text()
+
+  let data
+  try {
+    data = text ? JSON.parse(text) : {}
+  } catch {
+    throw new Error("Invalid server response")
   }
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || "Request failed");
+    console.error("API Error:", data)
+    throw new Error(data.message || "Request failed")
   }
 
-  return res.json();
+  return data
 }
+
 
 const userAPI = {
   me: () => fetchWithAuth("/api/user/me"),
@@ -189,7 +195,7 @@ export default function MemberDashboard() {
         </div>
 
         {/* JuanTap Profile & Gallery Section */}
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* JuanTap Profile Card */}
           <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
             <div className="flex items-center gap-3 mb-3">

@@ -16,6 +16,7 @@ import {
   Camera,
   ChevronDown,
   ChevronUp,
+  User,
 } from "lucide-react"
 
 export default function AdminHeader() {
@@ -32,6 +33,7 @@ export default function AdminHeader() {
     { icon: Mail, label: "Contact Messages", path: "/dashboard/admin/contact" },
     { icon: FileText, label: "Legitimacy", path: "/dashboard/admin/legitimacy" },
     { icon: Camera, label: "Vlogs", path: "/dashboard/admin/vlogs" },
+    { icon: User, label: "Users", path: "/dashboard/admin/users" },
   ]
 
   const customizationItems = [
