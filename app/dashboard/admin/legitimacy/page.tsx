@@ -119,9 +119,28 @@ export default function AdminLegitimacyPage() {
   }
 
   const openEditModal = (app: LegitimacyRequest) => {
+    console.log("=== OPENING EDIT MODAL ===", {
+      appId: app.id,
+      appAlias: app.alias,
+      fullApp: app
+    })
+    
+    // 🔥 CRITICAL: Set the selected application FIRST
     setSelectedApplication(app)
     setModalMode("edit")
-    setIsModalOpen(true)
+    
+    // Then open modal on next tick to ensure state is updated
+    setTimeout(() => {
+      setIsModalOpen(true)
+    }, 0)
+  }
+
+  const closeModal = () => {
+    setIsModalOpen(false)
+    // Clear selected application after modal closes to prevent flicker
+    setTimeout(() => {
+      setSelectedApplication(null)
+    }, 300)
   }
 
   const openDeleteModal = (app: LegitimacyRequest) => {
@@ -289,13 +308,12 @@ export default function AdminLegitimacyPage() {
                       <td className="px-6 py-4 text-sm text-gray-900">{app.position}</td>
                       <td className="px-6 py-4">
                         <span
-                          className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                            app.status === "approved"
-                              ? "bg-green-100 text-green-700"
-                              : app.status === "pending"
-                                ? "bg-yellow-100 text-yellow-700"
-                                : "bg-red-100 text-red-700"
-                          }`}
+                          className={`px-2 py-1 text-xs font-semibold rounded-full ${app.status === "approved"
+                            ? "bg-green-100 text-green-700"
+                            : app.status === "pending"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-red-100 text-red-700"
+                            }`}
                         >
                           {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
                         </span>
@@ -305,6 +323,7 @@ export default function AdminLegitimacyPage() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => {
+                              console.log("VIEW button clicked", app.id)
                               setSelectedApplication(app)
                               setIsViewOpen(true)
                             }}
@@ -314,21 +333,38 @@ export default function AdminLegitimacyPage() {
                             <Eye className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handlePrint(app)}
-                            className="text-purple-600 p-1.5 rounded hover:bg-purple-50 transition-colors"
-                            title="Print certificate"
+                            onClick={() => {
+                              console.log("PRINT button clicked", app.id)
+                              handlePrint(app)
+                            }}
+                            disabled={app.status !== 'approved'}
+                            className={`p-1.5 rounded transition-colors ${app.status === 'approved'
+                              ? 'text-purple-600 hover:bg-purple-50'
+                              : 'text-gray-400 cursor-not-allowed'
+                              }`}
+                            title={app.status === 'approved' ? 'Print certificate' : 'Only approved certificates can be downloaded'}
                           >
                             <Printer className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => openEditModal(app)}
+                            onClick={(e) => {
+                              console.log("EDIT button clicked!", { 
+                                appId: app.id, 
+                                event: e,
+                                app: app 
+                              })
+                              openEditModal(app)
+                            }}
                             className="text-orange-600 p-1.5 rounded hover:bg-orange-50 transition-colors"
                             title="Edit application"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => openDeleteModal(app)}
+                            onClick={() => {
+                              console.log("DELETE button clicked", app.id)
+                              openDeleteModal(app)
+                            }}
                             className="text-red-600 p-1.5 rounded hover:bg-red-50 transition-colors"
                             title="Delete application"
                           >
@@ -376,9 +412,8 @@ export default function AdminLegitimacyPage() {
                       <button
                         key={pageNum}
                         onClick={() => setPagination((p) => ({ ...p, current_page: pageNum }))}
-                        className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
-                          pagination.current_page === pageNum ? "bg-orange-600 text-white" : "border border-gray-300 hover:bg-gray-50"
-                        }`}
+                        className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${pagination.current_page === pageNum ? "bg-orange-600 text-white" : "border border-gray-300 hover:bg-gray-50"
+                          }`}
                       >
                         {pageNum}
                       </button>
@@ -412,15 +447,21 @@ export default function AdminLegitimacyPage() {
             setSelectedApplication(null)
           }}
         />
-        {isModalOpen && (
+        
+        {/* 🔥 CRITICAL FIX: Only render modal when we have data in edit mode OR when in create mode */}
+        {isModalOpen && (modalMode === "create" || (modalMode === "edit" && selectedApplication?.id)) && (
           <AdminLegitimacyModal
             isOpen={isModalOpen}
             mode={modalMode}
             initialData={selectedApplication || undefined}
-            onClose={() => setIsModalOpen(false)}
-            onSubmitSuccess={fetchLegitimacy}
+            onClose={closeModal}
+            onSubmitSuccess={() => {
+              fetchLegitimacy()
+              closeModal()
+            }}
           />
         )}
+        
         <AdminDeleteLegitimacyModal
           isOpen={isDeleteOpen}
           itemName={deleteTarget?.alias || "Application"}

@@ -6,7 +6,6 @@ import MemberLayout from '@/components/memberLayout';
 import { motion } from "framer-motion";
 import AnnouncementsSection from '@/components/member-dashboard/member-announcement';
 import NewsSection from '@/components/member-dashboard/member-news';
-import TestimonialsSection from '@/components/member-dashboard/member-testimonial/page';
 
 interface JuanTapProfile {
   id: number;
@@ -181,192 +180,130 @@ export default function MemberDashboard() {
           <p className="text-gray-600 text-lg">Perpetual College Dashboard</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="grid grid-cols-1 gap-4 mb-8">
-            <AnnouncementsSection />
-            <NewsSection />
-          </div>
-
-          <div className="grid grid-cols-1 gap-6">
-            {/* JuanTap Profile Card */}
-         {/* JuanTap Profile Card - ULTRA COMPACT */}
-<div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
-  <div className="flex items-center gap-3 mb-3">
-    <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-      JT
-    </div>
-    <div className="flex-1 min-w-0">
-      <h3 className="text-sm font-semibold text-gray-800">
-        JuanTap Profile
-      </h3>
-      <p className="text-xs text-gray-500 truncate">
-        Digital identity & smart profile
-      </p>
-    </div>
-  </div>
-
-  {hasJuanTapProfile ? (
-    <>
-      {/* Compact Status Display */}
-      <div className="flex items-center gap-2 mb-3">
-        <div className={`flex-1 ${juantapProfile?.status === 'active' ? 'bg-green-50' : 'bg-orange-50'} rounded-lg p-2 text-center`}>
-          <p className={`text-xs font-semibold ${juantapProfile?.status === 'active' ? 'text-green-600' : 'text-orange-600'}`}>
-            {juantapProfile?.status === 'active' ? '✓ Active' : '○ Inactive'}
-          </p>
+        {/* Announcements & News Section */}
+        <div className="grid grid-cols-1 gap-4 mb-8">
+          <AnnouncementsSection />
+          <NewsSection />
         </div>
-        <div className="flex-1 bg-gray-50 rounded-lg p-2 text-center">
-          <p className="text-xs font-semibold text-gray-700 capitalize">
-            {juantapProfile?.subscription}
-          </p>
-        </div>
-      </div>
 
-      {/* Compact QR & URL Display */}
-      {(juantapProfile?.profile_url || juantapProfile?.qr_code) && (
-        <div className="flex items-center gap-3 mb-3 p-2 bg-gray-50 rounded-lg">
-          {juantapProfile?.qr_code && (
-            <img 
-              src={juantapProfile.qr_code} 
-              alt="QR Code" 
-              className="w-12 h-12 border border-gray-200 rounded flex-shrink-0"
-            />
-          )}
-          {juantapProfile?.profile_url && (
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-gray-500 mb-0.5">Profile URL</p>
-              <a 
-                href={juantapProfile.profile_url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-xs text-orange-600 hover:underline truncate block"
-              >
-                {juantapProfile.profile_url}
-              </a>
-            </div>
-          )}
-        </div>
-      )}
-
-      <button
-        onClick={openModal}
-        className="w-full px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-sm font-medium"
-      >
-        {(juantapProfile?.profile_url || juantapProfile?.qr_code) ? 'Update' : 'Add Details'}
-      </button>
-    </>
-  ) : (
-    <>
-      <button
-        onClick={() => window.open('https://www.juantap.info/', '_blank')}
-        className="w-full px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-sm font-medium mb-2"
-      >
-        Avail JuanTap Subscription
-      </button>
-
-      <button
-        onClick={openModal}
-        className="w-full px-3 py-2 border-2 border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition text-sm font-medium"
-      >
-        Add Existing Profile
-      </button>
-    </>
-  )}
-</div>
-
-            {/* Gallery Section */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-800">
-                  Gallery
-                </h2>
-                <button className="text-sm text-emerald-600 hover:underline">
-                  View all
-                </button>
+        {/* JuanTap Profile & Gallery Section */}
+        <div className="grid grid-cols-2 gap-6">
+          {/* JuanTap Profile Card */}
+          <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                JT
               </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-semibold text-gray-800">
+                  JuanTap Profile
+                </h3>
+                <p className="text-xs text-gray-500 truncate">
+                  Digital identity & smart profile
+                </p>
+              </div>
+            </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {[1, 2, 3, 4, 5, 6].map((item) => (
-                  <div
-                    key={item}
-                    className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 group cursor-pointer"
-                  >
-                    <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
-                      Image {item}
-                    </div>
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                      <span className="text-white text-xs font-medium">
-                        View
-                      </span>
-                    </div>
+            {hasJuanTapProfile ? (
+              <>
+                {/* Compact Status Display */}
+                <div className="flex items-center gap-2 mb-3">
+                  <div className={`flex-1 ${juantapProfile?.status === 'active' ? 'bg-green-50' : 'bg-orange-50'} rounded-lg p-2 text-center`}>
+                    <p className={`text-xs font-semibold ${juantapProfile?.status === 'active' ? 'text-green-600' : 'text-orange-600'}`}>
+                      {juantapProfile?.status === 'active' ? '✓ Active' : '○ Inactive'}
+                    </p>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+                  <div className="flex-1 bg-gray-50 rounded-lg p-2 text-center">
+                    <p className="text-xs font-semibold text-gray-700 capitalize">
+                      {juantapProfile?.subscription}
+                    </p>
+                  </div>
+                </div>
 
-        <TestimonialsSection />
-
-        {/* Business Partners Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="mb-12 text-center"
-            >
-              <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                <span className="uppercase bg-gradient-to-r from-yellow-600 via-red-600 to-red-900 bg-clip-text text-transparent">
-                  Our Business Partners
-                </span>
-              </h2>
-              <div className="w-32 h-1.5 bg-gradient-to-r from-yellow-600 via-red-600 to-red-900 rounded-full mx-auto mb-4" />
-              <p className="text-lg text-gray-700 max-w-2xl mx-auto font-medium">
-                Trusted organizations working with us to serve the community better
-              </p>
-            </motion.div>
-
-            <div className="relative overflow-hidden">
-              <motion.div
-                className="flex gap-10"
-                animate={{ x: ["0%", "-50%"] }}
-                transition={{
-                  repeat: Infinity,
-                  repeatType: "loop",
-                  duration: 30,
-                  ease: "linear",
-                }}
-              >
-                {[...BUSINESS_PARTNERS, ...BUSINESS_PARTNERS].map((partner, i) => (
-                  <div
-                    key={i}
-                    className="flex-shrink-0 w-64 h-32 bg-white rounded-2xl shadow-lg border border-gray-100 flex items-center justify-center hover:shadow-2xl transition-all"
-                  >
-                    {partner.logo ? (
+                {/* Compact QR & URL Display */}
+                {(juantapProfile?.profile_url || juantapProfile?.qr_code) && (
+                  <div className="flex items-center gap-3 mb-3 p-2 bg-gray-50 rounded-lg">
+                    {juantapProfile?.qr_code && (
                       <img
-                        src={partner.logo}
-                        alt={partner.name}
-                        className="max-h-16 object-contain"
+                        src={juantapProfile.qr_code}
+                        alt="QR Code"
+                        className="w-12 h-12 border border-gray-200 rounded flex-shrink-0"
                       />
-                    ) : (
-                      <span className="font-bold text-gray-700 text-center px-4">
-                        {partner.name}
-                      </span>
+                    )}
+                    {juantapProfile?.profile_url && (
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-gray-500 mb-0.5">Profile URL</p>
+                        <a
+                          href={juantapProfile.profile_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-orange-600 hover:underline truncate block"
+                        >
+                          {juantapProfile.profile_url}
+                        </a>
+                      </div>
                     )}
                   </div>
-                ))}
-              </motion.div>
+                )}
 
-              <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-gray-200 to-transparent pointer-events-none" />
-              <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-gray-200 to-transparent pointer-events-none" />
+                <button
+                  onClick={openModal}
+                  className="w-full px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-sm font-medium"
+                >
+                  {(juantapProfile?.profile_url || juantapProfile?.qr_code) ? 'Update' : 'Add Details'}
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => window.open('https://www.juantap.info/', '_blank')}
+                  className="w-full px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-sm font-medium mb-2"
+                >
+                  Avail JuanTap Subscription
+                </button>
+
+                <button
+                  onClick={openModal}
+                  className="w-full px-3 py-2 border-2 border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 transition text-sm font-medium"
+                >
+                  Add Existing Profile
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Gallery Section */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-800">
+                Gallery
+              </h2>
+              <button className="text-sm text-emerald-600 hover:underline">
+                View all
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {[1, 2, 3, 4, 5, 6].map((item) => (
+                <div
+                  key={item}
+                  className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 group cursor-pointer"
+                >
+                  <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
+                    Image {item}
+                  </div>
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                    <span className="text-white text-xs font-medium">
+                      View
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* ========================= */}
         {/* JUANTAP MODAL */}
-        {/* ========================= */}
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
             <motion.div

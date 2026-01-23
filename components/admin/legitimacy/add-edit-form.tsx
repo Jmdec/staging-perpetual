@@ -35,6 +35,10 @@ interface Legitimacy {
   status: "pending" | "approved" | "rejected"
   admin_note?: string | null
   certificate_date?: string
+  certification_details?: string
+  school_name?: string
+  address?: string
+  logo_url?: string
   signatories: Signatory[]
 }
 
@@ -55,12 +59,17 @@ export default function AdminLegitimacyModal({ isOpen, mode, initialData, onClos
     status: "pending",
     admin_note: "",
     certificate_date: "",
+    certification_details: "",
+    school_name: "",
+    address: "",
+    logo_url: "",
     signatories: [],
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [users, setUsers] = useState<User[]>([])
   const [loadingUsers, setLoadingUsers] = useState(false)
   const [deletedSignatoryIds, setDeletedSignatoryIds] = useState<number[]>([])
+  const [logoFile, setLogoFile] = useState<File | null>(null)
 
   // Fetch users with fraternity numbers
   useEffect(() => {
@@ -91,6 +100,7 @@ export default function AdminLegitimacyModal({ isOpen, mode, initialData, onClos
       const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_URL || ""
 
       setForm({
+        id: initialData.id, // 🔥 IMPORTANT: Store the ID in form state
         alias: initialData.alias,
         chapter: initialData.chapter,
         position: initialData.position,
@@ -98,6 +108,10 @@ export default function AdminLegitimacyModal({ isOpen, mode, initialData, onClos
         status: initialData.status,
         admin_note: initialData.admin_note || "",
         certificate_date: initialData.certificate_date || "",
+        certification_details: initialData.certification_details || "",
+        school_name: initialData.school_name || "",
+        address: initialData.address || "",
+        logo_url: initialData.logo_url || "",
         signatories:
           initialData.signatories?.map((sig) => ({
             id: sig.id,
@@ -109,6 +123,7 @@ export default function AdminLegitimacyModal({ isOpen, mode, initialData, onClos
           })) || [],
       })
       setDeletedSignatoryIds([])
+      setLogoFile(null)
     } else {
       setForm({
         alias: "",
@@ -118,9 +133,14 @@ export default function AdminLegitimacyModal({ isOpen, mode, initialData, onClos
         status: "pending",
         admin_note: "",
         certificate_date: "",
+        certification_details: "",
+        school_name: "",
+        address: "",
+        logo_url: "",
         signatories: [],
       })
       setDeletedSignatoryIds([])
+      setLogoFile(null)
     }
   }, [mode, initialData, isOpen])
 
@@ -140,7 +160,6 @@ export default function AdminLegitimacyModal({ isOpen, mode, initialData, onClos
   const removeSignatory = (index: number) => {
     const signatory = form.signatories[index]
 
-    // If the signatory has an ID, track it for deletion
     if (signatory.id) {
       setDeletedSignatoryIds([...deletedSignatoryIds, signatory.id])
     }
@@ -156,25 +175,40 @@ export default function AdminLegitimacyModal({ isOpen, mode, initialData, onClos
       return
     }
 
-    // Validate fraternity number exists in users list (for create mode)
-    if (mode === "create") {
-      const userExists = users.find((u) => u.fraternity_number === form.fraternity_number)
-      if (!userExists) {
-        toast({
-          title: "Error",
-          description: "Invalid fraternity number. Please select a valid user.",
-          variant: "destructive",
-        })
-        return
-      }
+    // 🔥 CRITICAL: Validate that we have an ID when editing
+    if (mode === "edit" && !form.id) {
+      console.error("EDIT MODE ERROR: No legitimacy ID available", {
+        form,
+        initialData,
+        formId: form.id,
+        initialDataId: initialData?.id
+      })
+      toast({
+        title: "Error",
+        description: "Cannot update: Legitimacy ID is missing. Please close and reopen the modal.",
+        variant: "destructive",
+      })
+      return
     }
+
+    console.log("=== SUBMIT DEBUG ===", {
+      mode,
+      formId: form.id,
+      initialDataId: initialData?.id,
+      url: mode === "create" ? "/admin/legitimacy" : `/admin/legitimacy/${form.id}`
+    })
 
     setIsSubmitting(true)
     try {
-      const url = mode === "create" ? "/api/admin/legitimacy" : `/api/admin/legitimacy/${initialData?.id}`
-      const method = mode === "create" ? "POST" : "PUT"
+      const url =
+        mode === "create"
+          ? "/api/admin/legitimacy"
+          : `/api/admin/legitimacy/${form.id}` // 🔥 USE form.id instead of initialData?.id
+
+      console.log("Submitting to URL:", url, "Mode:", mode, "ID:", form.id)
 
       const payload = new FormData()
+
       payload.append("alias", form.alias)
       payload.append("chapter", form.chapter)
       payload.append("position", form.position)
@@ -182,6 +216,17 @@ export default function AdminLegitimacyModal({ isOpen, mode, initialData, onClos
       payload.append("status", form.status)
       payload.append("certificate_date", form.certificate_date)
       payload.append("admin_note", form.admin_note || "")
+      payload.append("certification_details", form.certification_details || "")
+      payload.append("school_name", form.school_name || "")
+      payload.append("address", form.address || "")
+
+
+
+
+      // Add logo file if selected
+      if (logoFile) {
+        payload.append("logo_file", logoFile)
+      }
 
       // Add deleted signatory IDs for update mode
       if (mode === "edit" && deletedSignatoryIds.length > 0) {
@@ -192,65 +237,57 @@ export default function AdminLegitimacyModal({ isOpen, mode, initialData, onClos
 
       // Filter out signatories with empty names and add them properly indexed
       const validSignatories = form.signatories.filter(sig => sig.name.trim() !== "")
-      
+
       validSignatories.forEach((sig, i) => {
         payload.append(`signatories[${i}][name]`, sig.name.trim())
-        
+
         if (sig.id) {
           payload.append(`signatories[${i}][id]`, sig.id.toString())
         }
-        
+
         if (sig.role && sig.role.trim()) {
           payload.append(`signatories[${i}][role]`, sig.role.trim())
         }
-        
+
         if (sig.signed_date) {
           payload.append(`signatories[${i}][signed_date]`, sig.signed_date)
         }
-        
+
         if (sig.signature_file instanceof File) {
           payload.append(`signatories[${i}][signature_file]`, sig.signature_file)
         }
       })
 
-      // Log FormData for debugging
-      console.log("Submitting FormData:")
-      for (let [key, value] of payload.entries()) {
-        console.log(key, ":", value instanceof File ? `File: ${value.name}` : value)
-      }
-
-      console.log(`Sending ${method} request to:`, url)
-
       const res = await fetch(url, {
-        method,
+        method: "POST",
         body: payload,
         credentials: "include",
       })
 
-      console.log("Response status:", res.status)
-      
-      const data = await res.json()
-      console.log("Response data:", data)
-      
-      if (res.ok && data.success) {
-        console.log("✅ Success! Updated data:", data.data)
+      const text = await res.text()
+      let data = null
+
+      try {
+        data = text ? JSON.parse(text) : null
+      } catch {
+        console.error("Non-JSON response:", text)
+      }
+
+      if (res.ok && data?.success) {
         toast({
           title: "Success",
           description: `Legitimacy ${mode === "create" ? "created" : "updated"} successfully.`,
         })
-        
-        // Call onSubmitSuccess to refresh the list
+
         onSubmitSuccess()
-        
-        // Close modal after a brief delay to ensure refresh happens
+
         setTimeout(() => {
           onClose()
         }, 100)
       } else {
-        console.error("❌ Server error response:", data)
         toast({
           title: "Error",
-          description: data.message || data.errors?.fraternity_number?.[0] || "Failed to save.",
+          description: data?.message || data?.errors?.fraternity_number?.[0] || "Failed to save.",
           variant: "destructive",
         })
       }
@@ -321,6 +358,71 @@ export default function AdminLegitimacyModal({ isOpen, mode, initialData, onClos
                   value={form.certificate_date || ""}
                   onChange={(e) => setForm({ ...form, certificate_date: e.target.value })}
                 />
+              </div>
+            </div>
+
+            {/* New Certificate Information Fields */}
+            <div className="space-y-4 border-t pt-4">
+              <h3 className="text-sm font-semibold">Certificate Information</h3>
+
+              <div>
+                <Label htmlFor="school-name">School Name</Label>
+                <Input
+                  id="school-name"
+                  value={form.school_name || ""}
+                  onChange={(e) => setForm({ ...form, school_name: e.target.value })}
+                  placeholder="e.g., University of the Philippines"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
+                  value={form.address || ""}
+                  onChange={(e) => setForm({ ...form, address: e.target.value })}
+                  placeholder="e.g., Quezon City, Metro Manila"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="certification-details">Certification Details</Label>
+                <Textarea
+                  id="certification-details"
+                  value={form.certification_details || ""}
+                  onChange={(e) => setForm({ ...form, certification_details: e.target.value })}
+                  className="resize-none"
+                  rows={3}
+                  placeholder="Additional certification details or notes"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="logo-file">Certificate Logo</Label>
+                <Input
+                  id="logo-file"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      setLogoFile(file)
+                    }
+                  }}
+                />
+                {logoFile && <p className="text-xs text-green-600 mt-1">✓ New logo selected: {logoFile.name}</p>}
+                {form.logo_url && !logoFile && (
+                  <div className="mt-2">
+                    <Label>Current Logo</Label>
+                    <div className="mt-1 p-2 border rounded-md bg-white">
+                      <img
+                        src={form.logo_url}
+                        alt="Certificate logo"
+                        className="w-32 h-32 object-contain"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -411,11 +513,6 @@ export default function AdminLegitimacyModal({ isOpen, mode, initialData, onClos
                           src={sig.signature_url}
                           alt={`Signature of ${sig.name || "signatory"}`}
                           className="w-40 h-24 object-contain"
-                          onError={(e) => {
-                            console.error("Image failed to load:", sig.signature_url)
-                            e.currentTarget.src =
-                              "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='96'%3E%3Crect width='160' height='96' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%239ca3af' font-family='sans-serif' font-size='12'%3EImage not found%3C/text%3E%3C/svg%3E"
-                          }}
                         />
                       </div>
                     </div>

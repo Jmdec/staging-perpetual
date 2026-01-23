@@ -21,6 +21,9 @@ import {
   ChevronUp,
   ChevronLeft,
   ChevronRight,
+  Handshake,
+  Megaphone,
+  BadgeCheck,
 } from 'lucide-react';
 import { authClient } from '@/lib/auth';
 import { useToast } from '@/components/ui/use-toast';
@@ -106,92 +109,113 @@ export default function MemberSidebar({
 
   const navigationItems = [
     { icon: Home, label: 'Home', path: '/dashboard/member' },
-    { icon: Grid3x3, label: 'Partners', path: '/dashboard/member/partners' },
     { icon: Newspaper, label: 'News', path: '/dashboard/member/news' },
-    { icon: User, label: 'Announcemnets', path: '/dashboard/member/announcements' },
-    { icon: User, label: 'Legitemacy', path: '/dashboard/member/legitimacy' },
+    { icon: Megaphone, label: 'Announcements', path: '/dashboard/member/announcement' },
+    { icon: Handshake, label: 'Partners', path: '/dashboard/member/partners' },
+    { icon: BadgeCheck, label: 'Certificate of Legitemacy', path: '/dashboard/member/legitimacy' },
   ];
 
   return (
-    <aside className={`hidden lg:block fixed top-0 left-0 h-full overflow-visible bg-gradient-to-b from-yellow-600/90 via-red-800/90 to-red-900/90 text-white shadow-2xl z-50 transition-all duration-300 ${isCollapsed ? "w-[70px]" : "w-[300px]"}`}>
-      <button onClick={toggleSidebar} className="absolute top-4 -right-3 bg-white text-slate-800 rounded-full p-1.5 shadow-lg hover:bg-slate-100 transition-colors z-[999]">
+    <aside
+      className={`hidden lg:block fixed top-0 left-0 h-full overflow-visible 
+        bg-gradient-to-b from-yellow-600/90 via-red-800/90 to-red-900/90 
+        text-white shadow-2xl z-50 transition-all duration-300 
+        ${isCollapsed ? "w-[70px]" : "w-[300px]"}`}
+    >
+      <button
+        onClick={toggleSidebar}
+        className="absolute top-4 -right-3 bg-white text-slate-800 rounded-full p-1.5 shadow-lg hover:bg-slate-100 transition-colors z-[999]"
+      >
         {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
       </button>
 
       {/* Scrollable Content */}
-      <div className={`h-full overflow-y-auto overflow-x-hidden ${isCollapsed ? 'py-8 px-4' : 'py-8 px-8'} flex flex-col min-h-full`}
+      <div
+        className={`h-full overflow-y-auto overflow-x-hidden ${isCollapsed ? "py-8 px-4" : "py-8 px-8"
+          } flex flex-col min-h-full`}
         style={{
           scrollbarWidth: "thin",
-          scrollbarColor: "#eda909b0 #992f2f"
+          scrollbarColor: "#eda909b0 #992f2f",
         }}
       >
         {/* Logo Section */}
-        <div className={`flex items-center gap-2 mb-4 py-3 ${isCollapsed ? 'justify-center' : ''}`}>
-          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0">
-            <Shield className="text-emerald-600" size={20} />
+        <div
+          className={`flex items-center gap-2 mb-4 py-3 ${isCollapsed ? "justify-center" : ""
+            }`}
+        >
+          <div
+            className="w-10 h-10 rounded-full
+              bg-gradient-to-b from-yellow-600/90 via-red-800/90 to-red-900/90
+              flex items-center justify-center flex-shrink-0
+              ring-2 ring-white/30 shadow-lg"
+          >
+            <img
+              src="/perpetuallogo.jpg"
+              alt="Perpetual Help Logo"
+              className="w-10 h-10 rounded-full object-cover"
+            />
           </div>
+
           {!isCollapsed && (
             <div>
-              <h1 className="font-bold text-base">Perpetual Village City</h1>
+              <h1 className="font-bold text-base">Perpetual Help</h1>
               <p className="text-xs text-emerald-100">Member Portal</p>
             </div>
           )}
         </div>
 
+
         {/* Main Navigation */}
         <nav className="space-y-1 flex-1 py-2 border-t border-white/20">
           {navigationItems.map((item, index) => {
-            const active = isActive(item.path);
+            const active = isActive(item.path)
 
             return (
               <div key={index} className="group">
-                {/* MAIN BUTTON */}
                 <button
                   onClick={() => router.push(item.path)}
-                  className={`w-full flex items-center gap-2 px-3 py-3 rounded-lg text-left transition-colors text-sm ${isCollapsed ? 'justify-center' : ''} ${active ? "bg-white/20 font-semibold shadow-lg" : "hover:bg-white/10"}`}
+                  className={`w-full flex items-center gap-2 px-3 py-3 rounded-lg text-left transition-colors text-sm
+              ${isCollapsed ? "justify-center" : ""}
+              ${active ? "bg-white/20 font-semibold shadow-lg" : "hover:bg-white/10"}`}
                 >
                   <item.icon size={16} />
-                  {!isCollapsed && <span className="text-sm">{item.label}</span>}
+                  {!isCollapsed && <span>{item.label}</span>}
                 </button>
 
-                {/* COLLAPSED MODE FLYOUT */}
+                {/* Collapsed Flyout */}
                 {isCollapsed && (
-                  <div className="absolute left-full w-44 -translate-y-1/2 -m-5 px-3 py-2 -ml-2 bg-emerald-600 text-white text-xs font-semibold rounded-md shadow-xl opacity-0 translate-x-2 invisible pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 group-hover:visible group-hover:pointer-events-auto transition-all duration-200 ease-out z-[9999]">
+                  <div className="absolute left-full w-44 -translate-y-1/2 -m-5 px-3 py-2 -ml-2 bg-emerald-600 text-white text-xs font-semibold rounded-md shadow-xl opacity-0 translate-x-2 invisible pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 group-hover:visible group-hover:pointer-events-auto transition-all duration-200 z-[9999]">
                     {item.label}
                   </div>
                 )}
               </div>
-            );
+            )
           })}
-
-         
         </nav>
 
-        {/* Logout Section */}
+        {/* Logout */}
         <div className="py-6 border-t border-white/20">
           <button
             onClick={handleLogout}
             disabled={isLoggingOut}
-            className={`w-full flex items-center gap-2 px-3 py-3 rounded-lg hover:bg-red-500/20 transition-colors text-left group disabled:opacity-50 disabled:cursor-not-allowed text-sm ${isCollapsed ? 'justify-center' : ''}`}
+            className={`w-full flex items-center gap-2 px-3 py-3 rounded-lg hover:bg-red-500/20 transition-colors text-sm
+        ${isCollapsed ? "justify-center" : ""}`}
           >
             {isLoggingOut ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                {!isCollapsed && <span className="font-medium">Logging out...</span>}
+                {!isCollapsed && <span>Logging out...</span>}
               </>
             ) : (
               <>
-                <LogOut size={16} className="group-hover:text-red-200" />
-                {!isCollapsed && (
-                  <span className="font-medium group-hover:text-red-200">
-                    Logout
-                  </span>
-                )}
+                <LogOut size={16} />
+                {!isCollapsed && <span>Logout</span>}
               </>
             )}
           </button>
         </div>
       </div>
     </aside>
+
   );
 }

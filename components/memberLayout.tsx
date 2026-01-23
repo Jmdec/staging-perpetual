@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import MemberSidebar from '@/components/MemberSidebar';
-import MemberBottomNav from '@/components/memberBottomNav';
 import MemberHeader from '@/components/memberHeader';
 import { authClient } from '@/lib/auth';
 
@@ -71,7 +70,7 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-emerald-50 via-white to-orange-50">
+    <div className="min-h-screen">
       {/* Sidebar - Desktop only */}
       <MemberSidebar
         isCollapsed={isSidebarCollapsed}
@@ -88,9 +87,6 @@ export default function MemberLayout({ children }: MemberLayoutProps) {
           {children}
         </main>
       </div>
-
-      {/* Bottom Navigation - Mobile only */}
-      <MemberBottomNav />
     </div>
   );
 }

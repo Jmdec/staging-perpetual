@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/AdminSidebar';
-import AdminBottomNav from '@/components/adminBottomNav';
 import AdminHeader from '@/components/adminHeader';
 import { authClient } from '@/lib/auth';
 
@@ -74,7 +73,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-slate-100">
-      
+
       {/* Sidebar - Desktop only */}
       <AdminSidebar
         isCollapsed={isSidebarCollapsed}
@@ -93,8 +92,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </main>
       </div>
 
-      {/* Bottom Navigation - Mobile only */}
-      <AdminBottomNav />
     </div>
   );
 }

@@ -1,13 +1,21 @@
 import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 
-/* ===================== PUT ===================== */
-export async function PUT(
+export async function POST(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: { id: number } }
 ): Promise<Response> {
   try {
-    const { id } = await context.params
+    const { id } = await params
+
+    console.log("API PARAM ID:", id)
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, message: `Invalid legitimacy ID ${id}` },
+        { status: 400 }
+      )
+    }
 
     const cookieStore = await cookies()
     const authToken = cookieStore.get("auth_token")
@@ -21,10 +29,13 @@ export async function PUT(
 
     const formData = await request.formData()
 
+    // Laravel method spoofing
+    formData.append("_method", "PUT")
+
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/admin/legitimacy/${id}`,
       {
-        method: "PUT",
+        method: "POST",
         headers: {
           Accept: "application/json",
           Authorization: `Bearer ${authToken.value}`,
@@ -34,10 +45,14 @@ export async function PUT(
       }
     )
 
-    const data = await response.json()
-    return NextResponse.json(data, { status: response.status })
+    const text = await response.text()
+
+    return new NextResponse(text, {
+      status: response.status,
+      headers: { "Content-Type": "application/json" },
+    })
   } catch (error) {
-    console.error(error)
+    console.error("NEXT API ERROR:", error)
     return NextResponse.json(
       { success: false, message: "Internal server error" },
       { status: 500 }
@@ -46,12 +61,20 @@ export async function PUT(
 }
 
 /* ===================== DELETE ===================== */
+
 export async function DELETE(
   _request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ): Promise<Response> {
   try {
-    const { id } = await context.params
+    const { id } = params
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, message: "Invalid legitimacy ID" },
+        { status: 400 }
+      )
+    }
 
     const cookieStore = await cookies()
     const authToken = cookieStore.get("auth_token")

@@ -180,14 +180,19 @@ export default function Header() {
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center gap-2 md:gap-3 cursor-pointer"
             >
-              <div className="flex items-center justify-center flex-shrink-0 w-12 h-12 md:w-14 md:h-14 mt-2">
+              <div
+                className="w-10 h-10 rounded-full
+                  bg-gradient-to-b from-yellow-600/90 via-red-800/90 to-red-900/90
+                  flex items-center justify-center flex-shrink-0
+                  ring-2 ring-white/30 shadow-lg"
+              >
                 <img
                   src="/perpetuallogo.jpg"
                   alt="Perpetual Village Logo"
-                  className="w-full h-full object-contain"
+                  className="w-10 h-10 rounded-full object-cover"
                 />
               </div>
-                <span className="text-base md:text-lg font-bold gradient-text">Perpetual Help</span>
+              <span className="text-base md:text-lg font-bold gradient-text">Perpetual Help</span>
             </motion.div>
           </Link>
 
@@ -276,37 +281,6 @@ export default function Header() {
                     {link.label}
                   </Link>
                 ))}
-
-                {/* Partner Logos Section */}
-                <div className="py-4 border-t border-yellow-100 mt-2">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3 px-2">
-                    Our Partners
-                  </h3>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { src: "/partners/perpetual.png", alt: "Perpetual Help" },
-                      { src: "/partners/lba.png", alt: "Local Business Alliance" },
-                      { src: "/partners/health.png", alt: "Health Services" },
-                      { src: "/partners/safety.png", alt: "Safety Office" },
-                      { src: "/partners/youth.png", alt: "Youth Development" },
-                      { src: "/partners/barangay.png", alt: "Barangay Office" },
-                    ].map((partner, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="bg-white rounded-lg border border-gray-200 p-2 flex items-center justify-center h-16 hover:border-yellow-400 transition-colors"
-                      >
-                        <img
-                          src={partner.src}
-                          alt={partner.alt}
-                          className="w-full h-full object-contain"
-                        />
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
 
                 {showInstallButton && !isInstalled && (
                   <motion.button
