@@ -202,7 +202,17 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-orange-50 flex items-center justify-center px-4">
+    <main className="min-h-screen bg-linear-to-br from-emerald-50 via-white to-orange-50 flex flex-col items-center justify-center px-4 relative">
+      {/* Home Navigation */}
+      <div className="absolute top-6 left-6">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-gray-700 font-medium hover:bg-gray-50 shadow-sm transition-all hover:shadow-md"
+        >
+          ← Home
+        </Link>
+      </div>
+
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}

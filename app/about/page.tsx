@@ -7,8 +7,8 @@ import CTASection from "@/components/cta-section"
 export default function AboutPage() {
   return (
     <PageLayout
-      title="About Perpetual Village"
-      subtitle="Explore our city's story and the mission behind what we do"
+      title="About Perpetual Help College"
+      subtitle="Explore our school's story and the mission behind what we do"
       image="/our-team2.jpg"
     >
       <AboutSection />

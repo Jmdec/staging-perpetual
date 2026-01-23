@@ -278,7 +278,7 @@ export default function AboutSection() {
   }
 
   return (
-    <section id="about" className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <section id="about" className="mb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-red-50 via-orange-50 to-green-50" />
 

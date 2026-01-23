@@ -5,10 +5,10 @@ import Link from "next/link"
 export default function CTASection() {
   return (
     <section className="py-20 bg-linear-to-br from-[#800000] to-yellow-700 text-white text-center">
-        <h2 className="text-5xl font-bold mb-6">
+        <h2 className="text-3xl lg:text-5xl font-bold mb-6 px-5">
           Start Your Journey at Perpetual College
         </h2>
-        <p className="text-xl mb-10 max-w-2xl mx-auto">
+        <p className="text-lg mb-10 max-w-2xl mx-5">
           Excellence, innovation, and holistic education await you.
         </p>
 

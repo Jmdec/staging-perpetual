@@ -13,8 +13,10 @@ interface User {
 
 interface JuanTapProfile {
   id: string
-  slug: string
-  displayName: string
+  profile_url: string
+  qr_code: string
+  status: 'active' | 'inactive'
+  subscription: 'free' | 'basic' | 'premium'
 }
 
 export default function Footer() {
@@ -24,20 +26,21 @@ export default function Footer() {
 
   /** 🔐 Check logged-in user */
   useEffect(() => {
-    fetch('/api/auth/me')
+    fetch('/api/auth/me', { credentials: 'include' })
       .then(res => res.ok ? res.json() : null)
-      .then(data => setUser(data))
+      .then(data => setUser(data?.user))
       .catch(() => setUser(null))
   }, [])
 
   /** 🪪 Check JuanTap profile */
   useEffect(() => {
-    if (!user || !user.verified) return
+    if (!user) return
 
-    fetch('/api/juantap/profile')
+    fetch('/api/juantap', { credentials: 'include' })
       .then(res => res.ok ? res.json() : null)
-      .then(data => setProfile(data))
+      .then(data => setProfile(data?.data))
       .finally(() => setLoadingProfile(false))
+      .catch(() => setLoadingProfile(false))
   }, [user])
 
   return (
@@ -50,17 +53,17 @@ export default function Footer() {
           {/* BRAND */}
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
             <h3 className="text-2xl font-bold mb-3 bg-linear-to-r from-red-400 via-orange-400 to-green-400 bg-clip-text text-transparent">
-              Perpetual Village
+              Perpetual Help College
             </h3>
             <p className="text-gray-400 text-sm mb-4">
-              Delivering quality government services to Las Piñas City residents
+              Excellence in education, commitment to community, and empowerment for the future
             </p>
 
             <div className="flex gap-3">
-              <a href="https://www.facebook.com/ilovepamplonatres" target="_blank">
+              <a href="https://www.facebook.com/perpetualhelpcollege" target="_blank" rel="noopener noreferrer">
                 <Facebook className="w-5 h-5 text-gray-400 hover:text-orange-400" />
               </a>
-              <a href="https://www.instagram.com/explore/locations/1034521926/barangay-pamplona-tres/" target="_blank">
+              <a href="https://www.instagram.com/perpetualhelpcollege/" target="_blank" rel="noopener noreferrer">
                 <Instagram className="w-5 h-5 text-gray-400 hover:text-orange-400" />
               </a>
             </div>
@@ -69,29 +72,36 @@ export default function Footer() {
           {/* NAV */}
           <div>
             <h4 className="font-bold mb-4">Navigation</h4>
-            {['Home','About','Services','News','Announcements','Contact'].map(p => (
-              <Link key={p} href={`/${p.toLowerCase()}`} className="block text-sm text-gray-400 hover:text-orange-400">
-                {p}
+            {[
+              { name: 'Home', path: '/' },
+              { name: 'About', path: '/about' },
+              { name: 'Services', path: '/services' },
+              { name: 'News', path: '/news' },
+              { name: 'Announcements', path: '/announcements' },
+              { name: 'Contact', path: '/contact' }
+            ].map(({ name, path }) => (
+              <Link key={name} href={path} className="block text-sm text-gray-400 hover:text-orange-400">
+                {name}
               </Link>
             ))}
           </div>
 
           {/* CONTACT */}
           <div>
-            <h4 className="font-bold mb-4">Contact</h4>
-            <p className="flex items-center gap-2 text-sm text-gray-400">
+            <h4 className="font-bold mb-4">Contact Us</h4>
+            <p className="flex items-center gap-2 text-sm text-gray-400 mb-2">
               <Phone className="w-4 h-4" /> (02) 8872-9664
             </p>
-            <p className="flex items-center gap-2 text-sm text-gray-400">
-              <Mail className="w-4 h-4" /> barangay.pamplonatres.lpc@gmail.com
+            <p className="flex items-center gap-2 text-sm text-gray-400 mb-2">
+              <Mail className="w-4 h-4" /> info@perpetualhelpCollege.edu.ph
             </p>
             <p className="flex items-center gap-2 text-sm text-gray-400">
-              <MapPin className="w-4 h-4" /> Las Piñas City
+              <MapPin className="w-4 h-4" /> Las Piñas City, Philippines
             </p>
           </div>
 
           {/* 🔥 JUANTAP NFC PROFILE */}
-          {user?.verified && (
+          {user && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -107,25 +117,32 @@ export default function Footer() {
                 <p className="text-sm text-gray-400">Checking profile…</p>
               ) : profile ? (
                 <>
-                  <p className="text-sm text-gray-300 mb-2">
-                    {profile.displayName}
-                  </p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${profile.status === 'active' ? 'bg-green-900 text-green-300' : 'bg-orange-900 text-orange-300'}`}>
+                      {profile.status === 'active' ? '✓ Active' : '○ Inactive'}
+                    </span>
+                    <span className="text-xs text-gray-400 capitalize">{profile.subscription}</span>
+                  </div>
+                  {profile.profile_url && (
+                    <a
+                      href={profile.profile_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-orange-400 hover:underline block mb-2 truncate"
+                    >
+                      View Profile →
+                    </a>
+                  )}
                   <Link
-                    href={`/juantap/${profile.slug}`}
-                    className="text-sm text-orange-400 hover:underline"
+                    href="/dashboard/member"
+                    className="block text-xs text-gray-400 hover:text-orange-400"
                   >
-                    View Profile →
-                  </Link>
-                  <Link
-                    href="/juantap/edit"
-                    className="block mt-2 text-xs text-gray-400 hover:text-orange-400"
-                  >
-                    Edit Profile
+                    Manage Profile
                   </Link>
                 </>
               ) : (
                 <Link
-                  href="/juantap/create"
+                  href="/dashboard/member"
                   className="inline-block text-sm bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600"
                 >
                   Create JuanTap Profile
@@ -137,9 +154,9 @@ export default function Footer() {
 
         {/* BOTTOM */}
         <div className="border-t border-gray-800 pt-6 text-center text-sm text-gray-500">
-          © {new Date().getFullYear()} Perpetual Village, Las Piñas City
-          <div>Powered By 
-            <Link href="https://www.infinitechphil.com/" className='underline'>Infinitech Philippines</Link>
+          © {new Date().getFullYear()} Perpetual Help College. All Rights Reserved.
+          <div className="mt-2">
+            <span>Building Leaders | Shaping Futures | Serving Communities</span>
           </div>
         </div>
       </div>

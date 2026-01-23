@@ -8,7 +8,7 @@ export default function NewsPage() {
   return (
     <PageLayout
       title="News"
-      subtitle="Read the latest stories from Perpetual Village"
+      subtitle="Read the latest stories from Perpetual Help College"
       image="/news_banner.png"
     >
       <NewsSection />
