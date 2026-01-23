@@ -9,7 +9,6 @@ import {
   User,
   LogOut,
   FileText,
-  Camera,
   Megaphone,
   ChevronLeft,
   ChevronRight,
@@ -82,14 +81,20 @@ export default function AdminSidebar({
     { icon: Megaphone, label: "Announcements", path: "/dashboard/admin/announcements" },
     { icon: Mail, label: "Contact Messages", path: "/dashboard/admin/contact" },
     { icon: FileText, label: "Legitimacy", path: "/dashboard/admin/legitimacy" },
-    { icon: FileText, label: "About", path: "/dashboard/admin/about" },
-    { icon: FileText, label: "Office", path: "/dashboard/admin/office-contact" },
-    { icon: Camera, label: "Vlogs", path: "/dashboard/admin/vlogs" },
-    { icon: User, label: "Business Partners", path: "/dashboard/admin/business-partners" },
+   
     { icon: User, label: "Users", path: "/dashboard/admin/users" },
+  ];
 
-    { icon: Images, label: "Gallery", path: "/dashboard/admin/gallery" },
-    { icon: Video, label: "Vlogs", path: "/dashboard/admin/vlogs" },];
+  const customization = [
+    { icon: FileText, label: "About Us", path: "/dashboard/admin/about-us" },
+    { icon: FileText, label: "Contact Information", path: "/dashboard/admin/office-contact" },
+    { icon: Handshake, label: "Partnerships", path: "/dashboard/admin/partners" },
+    { icon: Images, label: "Gallery", path: "/dashboard/admin/gallery" }, 
+    { icon: Video, label: "Vlogs", path: "/dashboard/admin/vlogs" },
+  ];
+
+  // const isaboutUsActive =
+  //   expandedSections.aboutUs || isSectionActive(customization);
 
   return (
     <aside
@@ -132,13 +137,13 @@ export default function AdminSidebar({
             />
             
           </div>
-        {!isCollapsed && (
-          <div>
-            <h1 className="font-bold text-base">Perpetual Help</h1>
-            <p className="text-xs text-emerald-100">Admin Panel</p>
-          </div>
-        )}
-      </div>
+          {!isCollapsed && (
+            <div>
+              <h1 className="font-bold text-base">Perpetual Help</h1>
+              <p className="text-xs text-emerald-100">Admin Panel</p>
+            </div>
+          )}
+        </div>
 
       {/* Main Navigation */}
       <nav className="space-y-1 flex-1 py-2 border-t border-white/20">

@@ -44,12 +44,6 @@ interface User {
   created_at: string
 }
 
-interface Certificate {
-  type: string
-  status: string
-  created_at: string
-}
-
 interface News {
   id: number
   status: "draft" | "published" | "archived"
@@ -74,7 +68,6 @@ export default function AdminDashboard() {
     pendingApprovals: 0,
   })
 
-  const [certificateChart, setCertificateChart] = useState<any[]>([])
   const [userStatusChart, setUserStatusChart] = useState<any[]>([])
   const [newsPieChart, setNewsPieChart] = useState<any[]>([])
   const [weeklyRegistrationChart, setWeeklyRegistrationChart] = useState<any[]>([])
@@ -89,28 +82,21 @@ export default function AdminDashboard() {
       setLoading(true)
 
       // Fetch all data in parallel
-      const [usersRes, certificatesRes, newsRes, announcementsRes] = await Promise.all([
-        fetch("/api/users?per_page=1000", { credentials: "include" }),
-        fetch("/api/certificates?per_page=1000", { credentials: "include" }),
-        fetch("/api/admin/news?per_page=1000", { credentials: "include" }),
-        fetch("/api/announcements?per_page=1000", { credentials: "include" }),
+      const [usersRes, newsRes, announcementsRes] = await Promise.all([
+        fetch("/api/users", { credentials: "include" }),
+        fetch("/api/admin/news", { credentials: "include" }),
+        fetch("/api/announcements", { credentials: "include" }),
       ])
 
       // Parse responses
       const usersJson = await usersRes.json()
-      const certificatesJson = await certificatesRes.json()
       const newsJson = await newsRes.json()
       const announcementsJson = await announcementsRes.json()
 
       // Extract data arrays
-      const users: User[] = usersJson.success ? (usersJson.data?.data || []) : []
-      const certificates: Certificate[] = certificatesJson.success
-        ? (certificatesJson.data?.data || [])
-        : []
-      const news: News[] = newsJson.success ? (newsJson.data?.data || []) : []
-      const announcements: Announcement[] = announcementsJson.success
-        ? (announcementsJson.data?.data || [])
-        : []
+      const users: User[] = usersJson.data && Array.isArray(usersJson.data) ? usersJson.data : (usersJson.data?.data || [])
+      const news: News[] = newsJson.data && Array.isArray(newsJson.data) ? newsJson.data : (newsJson.data?.data || [])
+      const announcements: Announcement[] = announcementsJson.data && Array.isArray(announcementsJson.data) ? announcementsJson.data : (announcementsJson.data?.data || [])
 
       /* ===== USERS STATS ===== */
       const approvedUsers = users.filter((u) => u.status === "approved").length
@@ -121,7 +107,7 @@ export default function AdminDashboard() {
       setStats({
         totalUsers: users.length,
         activeUsers: approvedUsers,
-        issuedCertificates: certificates.filter((c) => c.status === "issued").length,
+        issuedCertificates: news.filter((n) => n.status === "published").length,
         pendingApprovals: pendingUsers,
       })
 
@@ -151,21 +137,6 @@ export default function AdminDashboard() {
 
       setWeeklyRegistrationChart(
         Object.entries(weeklyMap).map(([day, value]) => ({ day, value }))
-      )
-
-      /* ===== CERTIFICATE ISSUANCE BY TYPE ===== */
-      const certMap: Record<string, number> = {}
-
-      certificates.forEach((c) => {
-        const type = c.type || "Other"
-        certMap[type] = (certMap[type] || 0) + 1
-      })
-
-      setCertificateChart(
-        Object.entries(certMap)
-          .map(([name, value]) => ({ name, value }))
-          .sort((a, b) => b.value - a.value)
-          .slice(0, 10) // Top 10 certificate types
       )
 
       /* ===== NEWS & ANNOUNCEMENTS ===== */
@@ -214,7 +185,7 @@ export default function AdminDashboard() {
 
   return (
     <AdminLayout>
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -323,19 +294,6 @@ export default function AdminDashboard() {
                 <YAxis />
                 <Tooltip />
                 <Bar dataKey="value" fill="#7c3aed" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartCard>
-
-          {/* Certificate Issuance */}
-          <ChartCard title="Certificate Issuance by Type" icon={FileCheck}>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={certificateChart}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="value" fill="#16a34a" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
