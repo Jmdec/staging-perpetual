@@ -293,7 +293,7 @@ export default function MemberDashboard() {
                       <img
                         src={juantapProfile.qr_code}
                         alt="QR Code"
-                        className="w-50 lg:w-70 w-50 lg:h-70 rounded-lg border bg-white items-center mx-auto"
+                        className="w-50 lg:w-60 w-50 lg:h-60 rounded-lg border bg-white items-center mx-auto"
                       />
                     )}
 
@@ -358,7 +358,7 @@ export default function MemberDashboard() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {[1, 2, 3, 4, 5, 6].map((item) => (
                 <div
                   key={item}

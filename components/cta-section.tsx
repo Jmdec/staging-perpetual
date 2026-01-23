@@ -8,7 +8,7 @@ export default function CTASection() {
         <h2 className="text-3xl lg:text-5xl font-bold mb-6 px-5">
           Start Your Journey at Perpetual College
         </h2>
-        <p className="text-lg mb-10 max-w-2xl mx-5">
+        <p className="text-lg mb-10 max-w-2xl mx-auto">
           Excellence, innovation, and holistic education await you.
         </p>
 
