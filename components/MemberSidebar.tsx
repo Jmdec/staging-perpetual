@@ -24,6 +24,7 @@ import {
   Handshake,
   Megaphone,
   BadgeCheck,
+  Camera,
 } from 'lucide-react';
 import { authClient } from '@/lib/auth';
 import { useToast } from '@/components/ui/use-toast';
@@ -112,6 +113,7 @@ export default function MemberSidebar({
     { icon: Newspaper, label: 'News', path: '/dashboard/member/news' },
     { icon: Megaphone, label: 'Announcements', path: '/dashboard/member/announcement' },
     { icon: Handshake, label: 'Partners', path: '/dashboard/member/partners' },
+    { icon: Camera, label: 'Gallery', path: '/dashboard/member/gallery' },
     { icon: BadgeCheck, label: 'Certificate of Legitemacy', path: '/dashboard/member/legitimacy' },
   ];
 

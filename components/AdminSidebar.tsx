@@ -13,6 +13,16 @@ import {
   Megaphone,
   ChevronLeft,
   ChevronRight,
+<<<<<<< HEAD
+=======
+  Handshake,
+  Images,
+  Settings,
+  Menu,
+  X,
+  Camera,
+  Video,
+>>>>>>> 5364289390ab283843186110486f8605c83aadb5
 } from "lucide-react";
 import { authClient } from "@/lib/auth";
 import { useToast } from "@/components/ui/use-toast";
@@ -76,6 +86,7 @@ export default function AdminSidebar({
     { icon: Megaphone, label: "Announcements", path: "/dashboard/admin/announcements" },
     { icon: Mail, label: "Contact Messages", path: "/dashboard/admin/contact" },
     { icon: FileText, label: "Legitimacy", path: "/dashboard/admin/legitimacy" },
+<<<<<<< HEAD
     { icon: FileText, label: "About", path: "/dashboard/admin/about" },
     { icon: FileText, label: "Office", path: "/dashboard/admin/office-contact" },
     { icon: Camera, label: "Vlogs", path: "/dashboard/admin/vlogs" },
@@ -83,6 +94,23 @@ export default function AdminSidebar({
     { icon: User, label: "Users", path: "/dashboard/admin/users" },
   ];
 
+=======
+   
+    { icon: User, label: "Users", path: "/dashboard/admin/users" },
+  ];
+
+  const customization = [
+    { icon: FileText, label: "About Us", path: "/dashboard/admin/about-us" },
+    { icon: FileText, label: "Contact Information", path: "/dashboard/admin/office-contact" },
+    { icon: Handshake, label: "Partnerships", path: "/dashboard/admin/partners" },
+    { icon: Images, label: "Gallery", path: "/dashboard/admin/gallery" }, 
+    { icon: Video, label: "Vlogs", path: "/dashboard/admin/vlogs" },
+  ];
+
+  const isaboutUsActive =
+    expandedSections.aboutUs || isSectionActive(customization);
+
+>>>>>>> 5364289390ab283843186110486f8605c83aadb5
   return (
     <aside
       className={`hidden lg:block fixed top-0 left-0 h-full overflow-visible 
@@ -121,11 +149,18 @@ export default function AdminSidebar({
           >
             <img
               src="/perpetuallogo.jpg"
+<<<<<<< HEAD
               alt="Perpetual Help"
               className="w-10 h-10 rounded-full object-cover"
             />
           </div>
 
+=======
+              alt="Perpetual Village Logo"
+              className="w-10 h-10 rounded-full object-cover"
+            />
+          </div>
+>>>>>>> 5364289390ab283843186110486f8605c83aadb5
           {!isCollapsed && (
             <div>
               <h1 className="font-bold text-base">Perpetual Help</h1>

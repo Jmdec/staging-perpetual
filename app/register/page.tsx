@@ -196,14 +196,24 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="min-h-screen bg-linear-to-br from-emerald-50 via-white to-orange-50 flex items-center justify-center px-4 py-12">
+    <main className="min-h-screen bg-linear-to-br from-emerald-50 via-white to-orange-50 flex flex-col items-center justify-center px-4 py-12 relative">
+      {/* Home Navigation */}
+      <div className="absolute top-6 left-6">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-gray-700 font-medium hover:bg-gray-50 shadow-sm transition-all hover:shadow-md"
+        >
+          ← Home
+        </Link>
+      </div>
+
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-2xl"
       >
-        <div className="card-premium p-10 md:p-12">
+        <div className="bg-white rounded-2xl shadow-xl p-10">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}

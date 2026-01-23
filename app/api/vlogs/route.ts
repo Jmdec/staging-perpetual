@@ -13,8 +13,18 @@ export const GET = async () => {
       return NextResponse.json({ success: false, message: `Backend error: ${text}` }, { status: res.status })
     }
 
-    const data = await res.json()
-    return NextResponse.json(data, { status: 200 })
+    const backendData = await res.json()
+    const vlogs = backendData?.data || []
+
+    // Rewrite video URLs to Next.js public folder
+    const updatedVlogs = vlogs.map((vlog: any) => ({
+      ...vlog,
+      video: vlog.video
+        ? `/vlogs/videos/${vlog.video.split("/").pop()}` // only keep filename
+        : null,
+    }))
+
+    return NextResponse.json({ success: true, data: updatedVlogs }, { status: 200 })
   } catch (err: any) {
     console.error("API /vlogs error:", err)
     return NextResponse.json({ success: false, message: err.message || "Something went wrong" }, { status: 500 })

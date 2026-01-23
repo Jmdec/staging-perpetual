@@ -30,24 +30,24 @@ export async function GET(request: NextRequest) {
     const token = await getAuthToken()
     console.log("[Mission&Vision API] GET - Token exists:", !!token)
 
-    if (!token) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      )
-    }
-
-    // Use the admin endpoint for authenticated requests
-    const url = `${API_URL}/mission-and-vision/admin`
+    // Use public endpoint for unauthenticated requests, admin endpoint for authenticated
+    const url = token 
+      ? `${API_URL}/mission-and-vision/show` 
+      : `${API_URL}/mission-and-vision`
     console.log("[Mission&Vision API] GET - Fetching from:", url)
+
+    const headers: any = {
+      Accept: "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    }
+    
+    if (token) {
+      headers.Authorization = `Bearer ${token}`
+    }
 
     const response = await fetch(url, {
       method: "GET",
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${token}`,
-        "X-Requested-With": "XMLHttpRequest",
-      },
+      headers,
       cache: "no-store",
     })
 

@@ -13,6 +13,7 @@ interface Vlog {
   date: string
   is_active: boolean
   video?: File | string
+  poster?: File | string
 }
 
 interface Props {
@@ -41,6 +42,7 @@ export default function AdminVlogsModal({ isOpen, mode, initialData, onClose, on
   const [video, setVideo] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [poster, setPoster] = useState<File | null>(null)
 
   useEffect(() => {
     if (isOpen) {
@@ -82,6 +84,9 @@ export default function AdminVlogsModal({ isOpen, mode, initialData, onClose, on
         formData.append("content", form.content)
         formData.append("is_active", form.is_active ? "1" : "0")
         if (form.description) formData.append("description", form.description)
+        if (poster) {
+          formData.append("poster", poster)
+        }
       }
 
       const url = mode === "create" ? `/api/admin/vlogs` : `/api/admin/vlogs/${id}`
@@ -119,7 +124,9 @@ export default function AdminVlogsModal({ isOpen, mode, initialData, onClose, on
     formData.append("content", form.content)
     formData.append("is_active", form.is_active ? "1" : "0")
     if (form.description) formData.append("description", form.description)
-
+    if (poster) {
+      formData.append("poster", poster)
+    }
     const xsrfCookie = document.cookie
       .split("; ")
       .find((c) => c.startsWith("XSRF-TOKEN="))
@@ -198,64 +205,84 @@ export default function AdminVlogsModal({ isOpen, mode, initialData, onClose, on
   }
   console.log("Initial video:", initialData)
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
-      <div className="bg-white rounded-lg w-full max-w-lg p-6 relative">
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+    <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 sm:p-6">
+      <div
+        className="bg-white rounded-lg w-full max-w-lg sm:max-w-xl md:max-w-2xl lg:max-w-3xl 
+                  p-4 sm:p-6 relative overflow-y-auto max-h-[90vh]"
+      >
+        {/* Close button */}
+        <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-gray-600">
           <X />
         </button>
 
-        <h2 className="text-xl font-bold mb-4">{mode === "create" ? "Add Vlog" : "Edit Vlog"}</h2>
+        {/* Title */}
+        <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-4">{mode === "create" ? "Add Vlog" : "Edit Vlog"}</h2>
 
+        {/* Form fields */}
         <div className="space-y-4">
           <input
-            className="w-full border rounded-lg px-3 py-2 text-sm"
+            className="w-full border rounded-lg px-3 py-2 text-sm sm:text-base"
             placeholder="Title"
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
           />
           <input
-            className="w-full border rounded-lg px-3 py-2 text-sm"
+            className="w-full border rounded-lg px-3 py-2 text-sm sm:text-base"
             placeholder="Category"
             value={form.category}
             onChange={(e) => setForm({ ...form, category: e.target.value })}
           />
           <input
             type="date"
-            className="w-full border rounded-lg px-3 py-2 text-sm"
+            className="w-full border rounded-lg px-3 py-2 text-sm sm:text-base"
             value={form.date}
             onChange={(e) => setForm({ ...form, date: e.target.value })}
           />
           <textarea
-            className="w-full border rounded-lg px-3 py-2 text-sm"
+            className="w-full border rounded-lg px-3 py-2 text-sm sm:text-base"
             placeholder="Short description"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
           <textarea
-            className="w-full border rounded-lg px-3 py-2 text-sm"
+            className="w-full border rounded-lg px-3 py-2 text-sm sm:text-base"
             placeholder="Content (required)"
             rows={4}
             value={form.content}
             onChange={(e) => setForm({ ...form, content: e.target.value })}
           />
+
+          {/* Poster upload */}
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            onChange={(e) => setPoster(e.target.files?.[0] || null)}
+            className="text-sm sm:text-base"
+          />
+          {mode === "edit" && initialData?.poster && !poster && (
+            <div className="mb-2">
+              <p className="text-sm text-gray-600">Current poster:</p>
+              <img src={getVideoUrl(initialData.poster)} alt="Poster" className="w-full max-h-48 rounded-lg border object-cover" />
+            </div>
+          )}
+
+          {/* Video upload */}
           <input
             type="file"
             accept="video/mp4,video/mov,video/avi,video/webm"
             onChange={(e) => setVideo(e.target.files?.[0] || null)}
-            className="text-sm"
+            className="text-sm sm:text-base"
           />
           {mode === "edit" && initialData?.video && !video && (
             <div className="mb-2">
               <p className="text-sm text-gray-600">Current video:</p>
-              <video
-                src={getVideoUrl(initialData.video)} // the video path from backend
-                controls
-                className="w-full max-h-64 rounded-lg border"
-              />
+              <video src={getVideoUrl(initialData.video)} controls className="w-full max-h-64 rounded-lg border" />
             </div>
           )}
+
+          {/* Status */}
           <select
-            className="w-full border rounded-lg px-3 py-2 text-sm"
+            className="w-full border rounded-lg px-3 py-2 text-sm sm:text-base"
             value={form.is_active ? "1" : "0"}
             onChange={(e) => setForm({ ...form, is_active: e.target.value === "1" })}
           >
@@ -264,14 +291,15 @@ export default function AdminVlogsModal({ isOpen, mode, initialData, onClose, on
           </select>
         </div>
 
-        <div className="flex justify-end gap-3 mt-6">
-          <button onClick={onClose} className="px-4 py-2 border rounded-lg text-sm">
+        {/* Actions */}
+        <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
+          <button onClick={onClose} className="px-4 py-2 border rounded-lg text-sm sm:text-base">
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm hover:bg-orange-700 disabled:opacity-50"
+            className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm sm:text-base hover:bg-orange-700 disabled:opacity-50"
           >
             {loading ? `Saving... ${progress}%` : "Save"}
           </button>

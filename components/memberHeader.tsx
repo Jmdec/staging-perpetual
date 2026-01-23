@@ -2,6 +2,9 @@
 
 import React, { useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
+
+import { authClient } from '@/lib/auth';
+import { useToast } from '@/components/ui/use-toast';
 import {
   Bell,
   LogOut,
@@ -17,6 +20,7 @@ import {
 export default function MemberHeader() {
   const router = useRouter()
   const pathname = usePathname()
+  const { toast } = useToast();
   const [menuOpen, setMenuOpen] = useState(false)
 
   const navigationItems = [
@@ -27,11 +31,31 @@ export default function MemberHeader() {
     { icon: BadgeCheck, label: "Certificate of Legitimacy", path: "/dashboard/member/legitimacy" },
   ]
 
-  const handleLogout = () => {
-    localStorage.removeItem("auth_token")
-    localStorage.removeItem("user")
-    router.push("/login")
-  }
+  const handleLogout = async () => {
+      try {
+        await authClient.logout();
+        
+        toast({
+          title: "✓ Logged Out Successfully",
+          description: "You have been securely logged out.",
+          className: "bg-green-50 border-green-200",
+          duration: 2000,
+        });
+  
+        setTimeout(() => {
+          router.push('/login');
+        }, 500);
+        
+      } catch (error) {
+        console.error('Logout error:', error);
+        
+        toast({
+          variant: "destructive",
+          title: "Logout Failed",
+          description: "An error occurred. Please try again.",
+        });
+      }
+    };
 
   const handleNavigate = (path: string) => {
     router.push(path)
@@ -47,36 +71,27 @@ export default function MemberHeader() {
 
       {/* Mobile Header */}
       <header className="lg:hidden bg-white shadow-sm sticky top-0 z-30 px-4 py-3">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div
-              className="w-10 h-10 rounded-full
-              bg-gradient-to-b from-yellow-600/90 via-red-800/90 to-red-900/90
-              flex items-center justify-center flex-shrink-0
-              ring-2 ring-white/30 shadow-lg"
-            >
-              <img
-                src="/perpetuallogo.jpg"
-                alt="Perpetual Village Logo"
-                className="w-10 h-10 rounded-full object-cover"
-              />
-            </div>
-            <div>
-              <h1 className="font-bold text-sm">Perpetual Help College</h1>
-              <p className="text-xs text-gray-500">Member Dashboard</p>
-            </div>
-          </div>
-
-          {/* Hamburger */}
-          <button
-            onClick={() => setMenuOpen(true)}
-            className="p-2 rounded-lg hover:bg-gray-100"
-          >
-            <Menu size={24} />
-          </button>
-        </div>
-      </header>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <img
+                    src="/perpetuallogo.jpg"
+                    alt="Perpetual Village Logo"
+                    className="w-10 h-10 rounded-full object-cover ring-2 ring-white/30 shadow-lg"
+                  />
+                  <div>
+                    <h1 className="font-bold text-sm">Perpetual Help College</h1>
+                    <p className="text-xs text-gray-500">Member Dashboard</p>
+                  </div>
+                </div>
+      
+                <button
+                  onClick={() => setMenuOpen(true)}
+                  className="p-2 rounded-lg hover:bg-gray-100"
+                >
+                  <Menu size={24} />
+                </button>
+              </div>
+            </header>
 
       {/* Overlay */}
       {menuOpen && (

@@ -1,59 +1,101 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server"
+import { cookies } from "next/headers"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+export const runtime = "nodejs"
 
-/* =========================
-   CREATE JUANTAP PROFILE
-   POST /api/juantap
-========================= */
-export async function POST(req: Request) {
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+
+async function proxy(req: NextRequest, method: "GET" | "POST" | "PUT" | "DELETE") {
+  const cookieStore = await cookies()
+  const authToken = cookieStore.get('auth_token')?.value
+  const cookie = req.headers.get("cookie") ?? ""
+
+  const options: RequestInit = {
+    method,
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      ...(cookie ? { Cookie: cookie } : {}),
+    },
+  }
+
+  if (method !== "GET" && method !== "DELETE") {
+    const body = await req.json()
+    options.body = JSON.stringify(body)
+  }
+
   try {
-    const body = await req.json();
+    const res = await fetch(`${API_URL}/api/juantap`, options)
+    const text = await res.text()
 
-    const res = await fetch(`${API_URL}/juantap`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Cookie: req.headers.get("cookie") || "", // forward cookies for session auth
-      },
-      body: JSON.stringify(body),
-    });
+    let data
+    try {
+      data = text ? JSON.parse(text) : {}
+    } catch {
+      console.error("Laravel returned non-JSON:", text)
+      return NextResponse.json(
+        { message: "Invalid backend response" },
+        { status: 502 }
+      )
+    }
 
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
-  } catch (error) {
-    console.error("POST /api/juantap error:", error);
+    return NextResponse.json(data, { status: res.status })
+  } catch (err) {
+    console.error("Proxy fetch error:", err)
     return NextResponse.json(
-      { message: "Failed to create JuanTap profile" },
-      { status: 500 }
-    );
+      { message: "Failed to reach backend" },
+      { status: 502 }
+    )
   }
 }
 
-/* =========================
-   UPDATE JUANTAP PROFILE
-   PUT /api/juantap
-========================= */
-export async function PUT(req: Request) {
+export async function GET(req: NextRequest) {
   try {
-    const body = await req.json();
-
-    const res = await fetch(`${API_URL}/juantap`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Cookie: req.headers.get("cookie") || "",
-      },
-      body: JSON.stringify(body),
-    });
-
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
-  } catch (error) {
-    console.error("PUT /api/juantap error:", error);
+    return await proxy(req, "GET")
+  } catch (err) {
+    console.error("GET /api/juantap error:", err)
     return NextResponse.json(
-      { message: "Failed to update JuanTap profile" },
+      { message: "JuanTap proxy failed" },
       { status: 500 }
-    );
+    )
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    return await proxy(req, "POST")
+  } catch (err) {
+    console.error("POST /api/juantap error:", err)
+    return NextResponse.json(
+      { message: "JuanTap proxy failed" },
+      { status: 500 }
+    )
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    return await proxy(req, "PUT")
+  } catch (err) {
+    console.error("PUT /api/juantap error:", err)
+    return NextResponse.json(
+      { message: "JuanTap proxy failed" },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    return await proxy(req, "DELETE")
+  } catch (err) {
+    console.error("DELETE /api/juantap error:", err)
+    return NextResponse.json(
+      { message: "JuanTap proxy failed" },
+      { status: 500 }
+    )
   }
 }
