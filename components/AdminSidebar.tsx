@@ -125,8 +125,7 @@ export default function AdminSidebar({
     { icon: Megaphone, label: "Announcements", path: "/dashboard/admin/announcements" },
     { icon: Mail, label: "Contact Messages", path: "/dashboard/admin/contact" },
     { icon: FileText, label: "Legitimacy", path: "/dashboard/admin/legitimacy" },
-    { icon: Camera, label: "Gallery", path: "/dashboard/admin/gallery" },
-    { icon: Video, label: "Vlogs", path: "/dashboard/admin/vlogs" },
+   
     { icon: User, label: "Users", path: "/dashboard/admin/users" },
   ];
 
@@ -134,7 +133,8 @@ export default function AdminSidebar({
     { icon: FileText, label: "About Us", path: "/dashboard/admin/about-us" },
     { icon: FileText, label: "Contact Information", path: "/dashboard/admin/office-contact" },
     { icon: Handshake, label: "Partnerships", path: "/dashboard/admin/partners" },
-    { icon: Images, label: "Gallery", path: "/dashboard/admin/gallery" },
+    { icon: Images, label: "Gallery", path: "/dashboard/admin/gallery" }, 
+    { icon: Video, label: "Vlogs", path: "/dashboard/admin/vlogs" },
   ];
 
   const isaboutUsActive =

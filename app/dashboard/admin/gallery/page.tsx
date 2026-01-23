@@ -106,7 +106,7 @@ export default function AdminGalleryPage() {
 
     const url = mode === "edit" ? `/api/admin/galleries/${editingId}` : "/api/admin/galleries"
 
-    const method = mode === "edit" ? "PUT" : "POST";
+    const method = mode === "edit" ? "PUT" : "POST"
 
     const res = await fetch(url, {
       method,
@@ -138,18 +138,42 @@ export default function AdminGalleryPage() {
     }
   }
 
-  
-
   if (authLoading) return null
 
   return (
     <AdminLayout>
       <div className="p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Gallery</h1>
-          <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg">
-            <Plus className="w-4 h-4" /> Add Image
-          </button>
+        <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
+              {/* Left side: icon + title */}
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-orange-100 rounded-lg">
+                  <ImageIcon className="w-6 h-6 text-orange-600" /> {/* Gallery icon */}
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">Gallery</h1>
+                  <p className="text-sm text-gray-500">Manage images and visual content</p>
+                </div>
+              </div>
+
+              {/* Right side: buttons */}
+              <button
+                onClick={openCreate} // your gallery create handler
+                className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-orange-500 text-white rounded-lg hover:from-red-700 hover:to-orange-600 transition-all"
+              >
+                <Plus className="w-5 h-5" />
+                New Image
+              </button>
+
+              <button
+                onClick={openCreate}
+                className="sm:hidden p-2 bg-gradient-to-r from-red-600 to-orange-500 text-white rounded-lg hover:from-red-700 hover:to-orange-600 transition-all"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
         </div>
 
         {loading ? (
@@ -157,7 +181,7 @@ export default function AdminGalleryPage() {
         ) : galleries.length === 0 ? (
           <p>No images yet.</p>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-2 md:grid-cols-4 gap-4">
             {galleries.map((g) => (
               <div key={g.id} className="border rounded-lg overflow-hidden">
                 <div className="relative h-40">
