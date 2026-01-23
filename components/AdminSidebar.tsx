@@ -14,6 +14,7 @@ import {
   ChevronUp,
   Menu,
   X,
+  Camera,
 } from "lucide-react";
 import { authClient } from "@/lib/auth";
 import { useToast } from "@/components/ui/use-toast";
@@ -94,6 +95,7 @@ export default function AdminSidebar() {
     { icon: Newspaper, label: "Announcements", path: "/dashboard/admin/announcements" },
     { icon: Mail, label: "Contact Messages", path: "/dashboard/admin/contact" },
     { icon: FileText, label: "Legitimacy", path: "/dashboard/admin/legitimacy" },
+    { icon: Camera, label: "Vlogs", path: "/dashboard/admin/vlogs" },
   ];
 
   // const certificateItems = [

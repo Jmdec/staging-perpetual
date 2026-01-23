@@ -21,7 +21,7 @@ import {
   CreditCard,
   AlertCircle,
   Hash,
-  Printer
+  Printer,
 } from "lucide-react"
 import AdminLayout from "@/components/adminLayout"
 import { useAuth } from "@/hooks/useAuth"
@@ -171,7 +171,7 @@ export default function AdminUsersPage() {
         credentials: "include",
         body: JSON.stringify({
           status: actionType,
-          rejection_reason: (actionType === "rejected" || actionType === "deactivated") ? rejectionReason : null,
+          rejection_reason: actionType === "rejected" || actionType === "deactivated" ? rejectionReason : null,
         }),
       })
 
@@ -225,9 +225,7 @@ export default function AdminUsersPage() {
       const queryString = params.toString()
 
       // FIXED: Changed from /api/export-pdf to /api/users/export/pdf
-      const url = queryString
-        ? `/api/export-pdf?${queryString}`
-        : "/api/export-pdf"
+      const url = queryString ? `/api/export-pdf?${queryString}` : "/api/export-pdf"
 
       console.log("Downloading PDF from:", url)
 
@@ -238,9 +236,9 @@ export default function AdminUsersPage() {
       if (response.ok) {
         const blob = await response.blob()
         const downloadUrl = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
+        const a = document.createElement("a")
         a.href = downloadUrl
-        a.download = `users-report-${new Date().toISOString().split('T')[0]}.pdf`
+        a.download = `users-report-${new Date().toISOString().split("T")[0]}.pdf`
         document.body.appendChild(a)
         a.click()
         window.URL.revokeObjectURL(downloadUrl)
@@ -313,18 +311,20 @@ export default function AdminUsersPage() {
     <AdminLayout>
       <div className="h-full overflow-auto bg-gray-50">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 sticky top-0 z-10">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Citizens Management</h1>
-              <p className="text-xs sm:text-sm text-gray-600 mt-1">Manage and review citizen registrations</p>
-            </div>
-            <div className="hidden sm:flex items-center gap-2 text-sm text-gray-600">
-              <Users className="w-5 h-5" />
-              <span className="font-medium">{pagination.total} Total</span>
+        <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+          <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 sticky top-0 z-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Citizens Management</h1>
+                <p className="text-xs sm:text-sm text-gray-600 mt-1">Manage and review citizen registrations</p>
+              </div>
+              <div className="hidden sm:flex items-center gap-2 text-sm text-gray-600">
+                <Users className="w-5 h-5" />
+                <span className="font-medium">{pagination.total} Total</span>
+              </div>
             </div>
           </div>
-        </header>
+        </div>
 
         {/* Main Content */}
         <main className="px-4 sm:px-6 py-4 sm:py-6">
@@ -387,21 +387,15 @@ export default function AdminUsersPage() {
             <div className="grid grid-cols-3 gap-2 sm:hidden mb-4">
               <div className="bg-white rounded-lg border border-gray-200 p-3 text-center">
                 <p className="text-xs text-gray-600">Pending</p>
-                <p className="text-lg font-bold text-orange-600">
-                  {users.filter((u) => u.status === "pending").length}
-                </p>
+                <p className="text-lg font-bold text-orange-600">{users.filter((u) => u.status === "pending").length}</p>
               </div>
               <div className="bg-white rounded-lg border border-gray-200 p-3 text-center">
                 <p className="text-xs text-gray-600">Approved</p>
-                <p className="text-lg font-bold text-green-600">
-                  {users.filter((u) => u.status === "approved").length}
-                </p>
+                <p className="text-lg font-bold text-green-600">{users.filter((u) => u.status === "approved").length}</p>
               </div>
               <div className="bg-white rounded-lg border border-gray-200 p-3 text-center">
                 <p className="text-xs text-gray-600">Rejected</p>
-                <p className="text-lg font-bold text-red-600">
-                  {users.filter((u) => u.status === "rejected").length}
-                </p>
+                <p className="text-lg font-bold text-red-600">{users.filter((u) => u.status === "rejected").length}</p>
               </div>
             </div>
 
@@ -434,7 +428,9 @@ export default function AdminUsersPage() {
                             <th className="px-3 sm:px-4 py-3 text-left text-xs font-semibold uppercase whitespace-nowrap">Address</th>
                             <th className="px-3 sm:px-4 py-3 text-left text-xs font-semibold uppercase whitespace-nowrap">Status</th>
                             <th className="px-3 sm:px-4 py-3 text-left text-xs font-semibold uppercase whitespace-nowrap">Registered</th>
-                            <th className="px-3 sm:px-4 py-3 text-center text-xs font-semibold uppercase whitespace-nowrap sticky right-0 bg-linear-to-r from-emerald-600 to-orange-500">Actions</th>
+                            <th className="px-3 sm:px-4 py-3 text-center text-xs font-semibold uppercase whitespace-nowrap sticky right-0 bg-linear-to-r from-emerald-600 to-orange-500">
+                              Actions
+                            </th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 bg-white">
@@ -450,20 +446,14 @@ export default function AdminUsersPage() {
                                   {user.email}
                                 </div>
                               </td>
+                              <td className="px-3 sm:px-4 py-3 text-sm text-gray-600 whitespace-nowrap">{user.phone_number || "N/A"}</td>
                               <td className="px-3 sm:px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
-                                {user.phone_number || 'N/A'}
-                              </td>
-                              <td className="px-3 sm:px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
-                                <div className="max-w-[200px] truncate" title={user.address || ''}>
-                                  {user.address || 'N/A'}
+                                <div className="max-w-[200px] truncate" title={user.address || ""}>
+                                  {user.address || "N/A"}
                                 </div>
                               </td>
-                              <td className="px-3 sm:px-4 py-3 whitespace-nowrap">
-                                {getStatusBadge(user.status)}
-                              </td>
-                              <td className="px-3 sm:px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
-                                {formatDate(user.created_at)}
-                              </td>
+                              <td className="px-3 sm:px-4 py-3 whitespace-nowrap">{getStatusBadge(user.status)}</td>
+                              <td className="px-3 sm:px-4 py-3 text-sm text-gray-600 whitespace-nowrap">{formatDate(user.created_at)}</td>
                               <td className="px-3 sm:px-4 py-3 text-center whitespace-nowrap sticky right-0 bg-white">
                                 <button
                                   onClick={() => handleViewUser(user)}
@@ -530,10 +520,9 @@ export default function AdminUsersPage() {
                           <button
                             key={pageNum}
                             onClick={() => handlePageChange(pageNum)}
-                            className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${pagination.current_page === pageNum
-                              ? "bg-orange-600 text-white"
-                              : "border border-gray-300 hover:bg-gray-50"
-                              }`}
+                            className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                              pagination.current_page === pageNum ? "bg-orange-600 text-white" : "border border-gray-300 hover:bg-gray-50"
+                            }`}
                           >
                             {pageNum}
                           </button>
@@ -568,10 +557,7 @@ export default function AdminUsersPage() {
                     <p className="text-xs sm:text-sm text-white/90">User #{selectedUser.id}</p>
                   </div>
                 </div>
-                <button
-                  onClick={closeModal}
-                  className="p-1.5 sm:p-2 hover:bg-white/20 rounded-lg transition-colors flex-shrink-0"
-                >
+                <button onClick={closeModal} className="p-1.5 sm:p-2 hover:bg-white/20 rounded-lg transition-colors flex-shrink-0">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -586,19 +572,15 @@ export default function AdminUsersPage() {
                       {getStatusBadge(selectedUser.status)}
                     </div>
                     {selectedUser.rejection_reason && (selectedUser.status === "rejected" || selectedUser.status === "deactivated") && (
-                      <div className={`mt-2 p-3 border rounded-lg ${selectedUser.status === "deactivated"
-                        ? "bg-gray-50 border-gray-300"
-                        : "bg-red-50 border-red-200"
-                        }`}>
-                        <p className={`text-sm flex items-start gap-2 ${selectedUser.status === "deactivated"
-                          ? "text-gray-800"
-                          : "text-red-800"
-                          }`}>
+                      <div
+                        className={`mt-2 p-3 border rounded-lg ${
+                          selectedUser.status === "deactivated" ? "bg-gray-50 border-gray-300" : "bg-red-50 border-red-200"
+                        }`}
+                      >
+                        <p className={`text-sm flex items-start gap-2 ${selectedUser.status === "deactivated" ? "text-gray-800" : "text-red-800"}`}>
                           <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                           <span>
-                            <span className="font-medium">
-                              {selectedUser.status === "deactivated" ? "Deactivation" : "Rejection"} Reason:{" "}
-                            </span>
+                            <span className="font-medium">{selectedUser.status === "deactivated" ? "Deactivation" : "Rejection"} Reason: </span>
                             {selectedUser.rejection_reason}
                           </span>
                         </p>
@@ -632,7 +614,7 @@ export default function AdminUsersPage() {
                           <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
                           Phone Number
                         </label>
-                        <p className="text-sm sm:text-base text-gray-900">{selectedUser.phone_number || 'Not provided'}</p>
+                        <p className="text-sm sm:text-base text-gray-900">{selectedUser.phone_number || "Not provided"}</p>
                       </div>
                       <div>
                         <label className="text-xs sm:text-sm font-medium text-gray-500">Role</label>
@@ -643,7 +625,7 @@ export default function AdminUsersPage() {
                           <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
                           Address
                         </label>
-                        <p className="text-sm sm:text-base text-gray-900 break-words">{selectedUser.address || 'Not provided'}</p>
+                        <p className="text-sm sm:text-base text-gray-900 break-words">{selectedUser.address || "Not provided"}</p>
                       </div>
                     </div>
                   </div>
@@ -660,9 +642,7 @@ export default function AdminUsersPage() {
                           <Hash className="w-3 h-3 sm:w-4 sm:h-4" />
                           Fraternity Number
                         </label>
-                        <p className="text-sm sm:text-base text-gray-900 mt-1 font-mono">
-                          {selectedUser.fraternity_number || 'Not provided'}
-                        </p>
+                        <p className="text-sm sm:text-base text-gray-900 mt-1 font-mono">{selectedUser.fraternity_number || "Not provided"}</p>
                       </div>
                     </div>
                   </div>
@@ -784,17 +764,20 @@ export default function AdminUsersPage() {
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-4">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
               {/* Confirmation Header */}
-              <div className={`px-6 py-4 ${actionType === "approved"
-                ? "bg-green-600"
-                : actionType === "deactivated"
-                  ? "bg-gray-600"
-                  : "bg-red-600"
-                } text-white`}>
+              <div
+                className={`px-6 py-4 ${
+                  actionType === "approved" ? "bg-green-600" : actionType === "deactivated" ? "bg-gray-600" : "bg-red-600"
+                } text-white`}
+              >
                 <h3 className="text-lg font-bold flex items-center gap-2">
                   {actionType === "approved" ? (
                     <>
                       <CheckCircle className="w-5 h-5" />
-                      {selectedUser.status === "rejected" ? "Re-approve User" : selectedUser.status === "deactivated" ? "Reactivate User" : "Approve User"}
+                      {selectedUser.status === "rejected"
+                        ? "Re-approve User"
+                        : selectedUser.status === "deactivated"
+                          ? "Reactivate User"
+                          : "Approve User"}
                     </>
                   ) : actionType === "deactivated" ? (
                     <>
@@ -821,8 +804,7 @@ export default function AdminUsersPage() {
                         : `Are you sure you want to approve ${selectedUser.name}'s registration? They will be able to access the system.`
                     : actionType === "deactivated"
                       ? `Are you sure you want to deactivate ${selectedUser.name}'s account? They will no longer be able to access the system until reactivated.`
-                      : `Are you sure you want to reject ${selectedUser.name}'s registration? Please provide a reason.`
-                  }
+                      : `Are you sure you want to reject ${selectedUser.name}'s registration? Please provide a reason.`}
                 </p>
 
                 {(actionType === "rejected" || actionType === "deactivated") && (
@@ -837,9 +819,7 @@ export default function AdminUsersPage() {
                       rows={4}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
-                      This reason will be saved and displayed to administrators.
-                    </p>
+                    <p className="text-xs text-gray-500 mt-1">This reason will be saved and displayed to administrators.</p>
                   </div>
                 )}
 
@@ -848,9 +828,7 @@ export default function AdminUsersPage() {
                     <p className="text-sm text-yellow-800 flex items-start gap-2">
                       <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                       <span>
-                        <span className="font-medium">
-                          Previous {selectedUser.status === "deactivated" ? "deactivation" : "rejection"} reason:{" "}
-                        </span>
+                        <span className="font-medium">Previous {selectedUser.status === "deactivated" ? "deactivation" : "rejection"} reason: </span>
                         {selectedUser.rejection_reason}
                       </span>
                     </p>
@@ -870,12 +848,13 @@ export default function AdminUsersPage() {
                   </button>
                   <button
                     onClick={handleUpdateStatus}
-                    className={`flex-1 px-4 py-2 rounded-lg text-white transition-colors text-sm font-medium ${actionType === "approved"
-                      ? "bg-green-600 hover:bg-green-700"
-                      : actionType === "deactivated"
-                        ? "bg-gray-600 hover:bg-gray-700"
-                        : "bg-red-600 hover:bg-red-700"
-                      }`}
+                    className={`flex-1 px-4 py-2 rounded-lg text-white transition-colors text-sm font-medium ${
+                      actionType === "approved"
+                        ? "bg-green-600 hover:bg-green-700"
+                        : actionType === "deactivated"
+                          ? "bg-gray-600 hover:bg-gray-700"
+                          : "bg-red-600 hover:bg-red-700"
+                    }`}
                   >
                     {actionType === "approved"
                       ? selectedUser.status === "rejected"
