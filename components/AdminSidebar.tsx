@@ -30,6 +30,7 @@ import {
   Menu,
   X,
   Camera,
+  Video,
 } from "lucide-react";
 import { authClient } from "@/lib/auth";
 import { useToast } from "@/components/ui/use-toast";
@@ -124,7 +125,8 @@ export default function AdminSidebar({
     { icon: Megaphone, label: "Announcements", path: "/dashboard/admin/announcements" },
     { icon: Mail, label: "Contact Messages", path: "/dashboard/admin/contact" },
     { icon: FileText, label: "Legitimacy", path: "/dashboard/admin/legitimacy" },
-    { icon: Camera, label: "Vlogs", path: "/dashboard/admin/vlogs" },
+    { icon: Camera, label: "Gallery", path: "/dashboard/admin/gallery" },
+    { icon: Video, label: "Vlogs", path: "/dashboard/admin/vlogs" },
     { icon: User, label: "Users", path: "/dashboard/admin/users" },
   ];
 
