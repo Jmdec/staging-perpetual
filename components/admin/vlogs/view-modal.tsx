@@ -11,6 +11,7 @@ interface Vlog {
   date: string
   created_at: string
   video?: string
+  poster?: string
 }
 
 interface Props {
@@ -68,6 +69,13 @@ export default function ViewVlogsModal({ isOpen, selectedItem, onClose }: Props)
             <span className="font-medium">Description:</span>
             <p className="text-gray-600 mt-1">{selectedItem.description || "-"}</p>
           </div>
+
+          {selectedItem.video && (
+            <div className="mt-4">
+              <span className="font-medium">Poster:</span>
+              <img src={getVideoUrl(selectedItem.poster)} className="w-full max-h-64 rounded-lg border mt-1" />
+            </div>
+          )}
 
           {/* Video player */}
           {selectedItem.video && (

@@ -23,6 +23,7 @@ interface Vlog {
   created_at: string
   video?: File | string
   content: string
+  poster?: string
 }
 
 interface NewsArticle {
@@ -388,7 +389,7 @@ export default function Home() {
                             key={`video-${video.id}-${carouselIndex}`}
                             className="w-full h-48 sm:h-56 md:h-64 lg:h-72 object-cover"
                             src={video.video ? getVideoUrl(video.video as string) : ""}
-                            poster="/video-poster3.jpg"
+                            poster={video.poster ? getVideoUrl(video.poster as string) : ""}
                             controls
                             controlsList="nodownload"
                             playsInline
