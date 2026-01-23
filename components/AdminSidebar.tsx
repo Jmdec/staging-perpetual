@@ -27,6 +27,9 @@ import {
   Handshake,
   Images,
   Settings,
+  Menu,
+  X,
+  Camera,
 } from "lucide-react";
 import { authClient } from "@/lib/auth";
 import { useToast } from "@/components/ui/use-toast";
@@ -120,7 +123,8 @@ export default function AdminSidebar({
     { icon: Newspaper, label: "News", path: "/dashboard/admin/news" },
     { icon: Megaphone, label: "Announcements", path: "/dashboard/admin/announcements" },
     { icon: Mail, label: "Contact Messages", path: "/dashboard/admin/contact" },
-    { icon: User, label: "Users", path: "/dashboard/admin/users" },
+    { icon: FileText, label: "Legitimacy", path: "/dashboard/admin/legitimacy" },
+    { icon: Camera, label: "Vlogs", path: "/dashboard/admin/vlogs" },
   ];
 
   const customization = [
