@@ -208,33 +208,33 @@ export default function Home() {
     fetchVlogs()
   }, [])
 
-  // useEffect(() => {
-  //   const fetchAnnouncements = async () => {
-  //     try {
-  //       setAnnouncementLoading(true)
+  useEffect(() => {
+    const fetchAnnouncements = async () => {
+      try {
+        setAnnouncementLoading(true)
 
-  //       const res = await fetch("/api/announcements/published?per_page=8")
+        const res = await fetch("/api/announcements/published?per_page=8")
 
-  //       if (!res.ok) {
-  //         throw new Error(`HTTP error ${res.status}`)
-  //       }
+        if (!res.ok) {
+          throw new Error(`HTTP error ${res.status}`)
+        }
 
-  //       const result = await res.json()
+        const result = await res.json()
 
-  //       if (result?.success) {
-  //         const data = result.data?.data && Array.isArray(result.data.data) ? result.data.data : Array.isArray(result.data) ? result.data : []
+        if (result?.success) {
+          const data = result.data?.data && Array.isArray(result.data.data) ? result.data.data : Array.isArray(result.data) ? result.data : []
 
-  //         setAnnouncements(data)
-  //       }
-  //     } catch (err) {
-  //       console.error("[Home] Failed to fetch announcements:", err)
-  //     } finally {
-  //       setAnnouncementLoading(false)
-  //     }
-  //   }
+          setAnnouncements(data)
+        }
+      } catch (err) {
+        console.error("[Home] Failed to fetch announcements:", err)
+      } finally {
+        setAnnouncementLoading(false)
+      }
+    }
 
-  //   fetchAnnouncements()
-  // }, [])
+    fetchAnnouncements()
+  }, [])
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -449,7 +449,7 @@ export default function Home() {
           </motion.div>
 
           {announcementLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
               {[...Array(8)].map((_, i) => (
                 <div key={i} className="p-8 rounded-3xl bg-linear-to-br from-red-200 via-orange-200 to-green-200 animate-pulse h-64" />
               ))}
@@ -506,7 +506,7 @@ export default function Home() {
       </section>
 
       {/* News Section */}
-      <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="w-full py-10 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-16 text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
@@ -681,7 +681,7 @@ export default function Home() {
       </AnimatePresence>
 
       {/* Testimonials Section */}
-      <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-linear-to-br from-orange-50 to-red-50 border-t border-gray-200 relative z-10">
+      <section className="w-full pt-10 px-4 sm:px-6 lg:px-8 bg-linear-to-br from-orange-50 to-red-50 border-t border-gray-200 relative z-10">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-16 text-center">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
@@ -743,7 +743,7 @@ export default function Home() {
       </section>
 
       {/* Business Partners Section */}
-      <section className="w-full py-20 px-4 sm:px-6 lg:px-8 bg-linear-to-br from-red-50 to-orange-50">
+      <section className="w-full pb-24 px-4 sm:px-6 lg:px-8 bg-linear-to-br from-red-50 to-orange-50">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-12 text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">

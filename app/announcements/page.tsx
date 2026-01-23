@@ -7,7 +7,7 @@ export default function AnnouncementsPage() {
   return (
     <PageLayout
       title="Announcements"
-      subtitle="Stay updated with the latest news from Perpetual Village"
+      subtitle="Stay updated with the latest news from Perpetual Help College"
       image="/using-announcements.jpg"
     >
       <AnnouncementsSection />
