@@ -473,7 +473,7 @@ export default function AdminLegitimacyModal({ isOpen, mode, initialData, onClos
                     <Label htmlFor={`signatory-role-${idx}`}>Role</Label>
                     <Input
                       id={`signatory-role-${idx}`}
-                      placeholder="e.g., Approved, Noted, Reviewed"
+                      placeholder="e.g., Founder, President"
                       value={sig.role || ""}
                       onChange={(e) => handleSignatoryChange(idx, "role", e.target.value)}
                     />
