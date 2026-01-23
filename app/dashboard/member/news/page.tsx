@@ -7,8 +7,6 @@ import Link from "next/link"
 import MemberLayout from "@/components/memberLayout"
 import { ArticleModal } from "@/components/member/article-modal"
 
-/* ================= TYPES ================= */
-
 interface NewsArticle {
   id: string
   title: string
@@ -30,8 +28,6 @@ interface ApiNewsArticle {
   published_at?: string | null
   created_at: string
 }
-
-/* ================= HELPERS ================= */
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
@@ -62,15 +58,11 @@ const transformArticle = (article: ApiNewsArticle): NewsArticle => ({
   author: "Admin",
 })
 
-/* ================= COMPONENT ================= */
-
 export default function NewsPage() {
   const [news, setNews] = useState<NewsArticle[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
-
-  /* ================= FETCH ================= */
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -90,8 +82,6 @@ export default function NewsPage() {
     fetchNews()
   }, [])
 
-  /* ================= RENDER ================= */
-
   return (
     <MemberLayout>
       <div className="h-screen overflow-auto bg-gray-50">
@@ -99,9 +89,6 @@ export default function NewsPage() {
         <header className="bg-linear-to-r from-orange-600 to-orange-500 text-white px-4 sm:px-6 py-3 sm:py-4 sticky top-0 z-10 shadow-md">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Link href="/" className="hover:bg-white/10 p-1 rounded-lg">
-                <ChevronLeft className="w-6 h-6" />
-              </Link>
               <div>
                 <h1 className="text-2xl font-bold">
                   Perpetual Help College News

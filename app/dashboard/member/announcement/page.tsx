@@ -128,13 +128,6 @@ export default function NewsPage() {
           <div className="px-4 sm:px-6 py-3 sm:py-4">
             <div className="flex items-start sm:items-center justify-between gap-3">
               <div className="flex items-start sm:items-center gap-3 min-w-0">
-                <Link
-                  href="/"
-                  className="p-2 rounded-lg hover:bg-white/10 flex-shrink-0"
-                >
-                  <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
-                </Link>
-
                 <div className="min-w-0">
                   <h1 className="text-base sm:text-lg lg:text-2xl font-bold leading-tight truncate">
                     Perpetual Help College Announcements
