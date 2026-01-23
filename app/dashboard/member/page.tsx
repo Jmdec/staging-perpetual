@@ -6,6 +6,7 @@ import MemberLayout from '@/components/memberLayout';
 import { motion } from "framer-motion";
 import AnnouncementsSection from '@/components/member-dashboard/member-announcement';
 import NewsSection from '@/components/member-dashboard/member-news';
+import { useAuth } from "@/hooks/useAuth"
 
 interface JuanTapProfile {
   id: number;
@@ -72,7 +73,8 @@ const BUSINESS_PARTNERS = [
 
 export default function MemberDashboard() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const {user, loading: authLoading} = useAuth(true)
+  const [setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
@@ -177,7 +179,7 @@ export default function MemberDashboard() {
               Welcome, {user?.name || 'Member'}!
             </span>
           </h1>
-          <p className="text-gray-600 text-lg">Perpetual College Dashboard</p>
+          <p className="text-gray-600 text-lg">Perpetual Help College Dashboard</p>
         </div>
 
         {/* Announcements & News Section */}

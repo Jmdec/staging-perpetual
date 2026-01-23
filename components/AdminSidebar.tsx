@@ -153,17 +153,17 @@ export default function AdminSidebar({
         {/* Logo Section */}
         <div className={`flex items-center gap-2 mb-4 py-3 ${isCollapsed ? 'justify-center' : ''}`}>
           <div
-              className="w-10 h-10 rounded-full
+            className="w-10 h-10 rounded-full
               bg-gradient-to-b from-yellow-600/90 via-red-800/90 to-red-900/90
               flex items-center justify-center flex-shrink-0
               ring-2 ring-white/30 shadow-lg"
-            >
-              <img
-                src="/perpetuallogo.jpg"
-                alt="Perpetual Village Logo"
-                className="w-10 h-10 rounded-full object-cover"
-              />
-            </div>
+          >
+            <img
+              src="/perpetuallogo.jpg"
+              alt="Perpetual Village Logo"
+              className="w-10 h-10 rounded-full object-cover"
+            />
+          </div>
           {!isCollapsed && (
             <div>
               <h1 className="font-bold text-base">Perpetual Help College</h1>
