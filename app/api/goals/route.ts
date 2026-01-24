@@ -1,34 +1,23 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
-
 async function getAuthToken() {
   const cookieStore = await cookies()
   return cookieStore.get("auth_token")?.value
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
+
 export async function GET(request: NextRequest) {
   try {
-    const token = await getAuthToken()
-    
-    // Use public endpoint for unauthenticated requests, admin endpoint for authenticated
-    const endpoint = token ? `${API_URL}/goals/show` : `${API_URL}/goals`
-    
-    console.log("[Goals API] GET - Fetching from:", endpoint)
+    console.log("[Goals API] GET - Fetching from:", `${API_URL}/goals`)
 
-    const headers: any = {
-      Accept: "application/json",
-      "X-Requested-With": "XMLHttpRequest",
-    }
-    
-    if (token) {
-      headers.Authorization = `Bearer ${token}`
-    }
-
-    const response = await fetch(endpoint, {
+    const response = await fetch(`${API_URL}/goals`, {
       method: "GET",
-      headers,
+      headers: {
+        Accept: "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+      },
       cache: "no-store",
     })
 
@@ -56,24 +45,18 @@ export async function GET(request: NextRequest) {
 
     const data = JSON.parse(responseText)
 
-    // Parse JSON strings back to arrays when reading from Laravel
+    // Parse JSON strings back to arrays
     if (data.success && data.data) {
       try {
-        data.data.goals_card_icon = typeof data.data.goals_card_icon === 'string'
-          ? JSON.parse(data.data.goals_card_icon)
-          : data.data.goals_card_icon || []
-
-        data.data.goals_card_title = typeof data.data.goals_card_title === 'string'
-          ? JSON.parse(data.data.goals_card_title)
-          : data.data.goals_card_title || []
-
-        data.data.goals_card_content = typeof data.data.goals_card_content === 'string'
-          ? JSON.parse(data.data.goals_card_content)
-          : data.data.goals_card_content || []
-
-        data.data.goals_card_list = typeof data.data.goals_card_list === 'string'
-          ? JSON.parse(data.data.goals_card_list)
-          : data.data.goals_card_list || []
+        const fields = ['goals_card_icon', 'goals_card_title', 'goals_card_content', 'goals_card_list']
+        
+        fields.forEach(field => {
+          if (data.data[field]) {
+            data.data[field] = typeof data.data[field] === 'string'
+              ? JSON.parse(data.data[field])
+              : data.data[field] || []
+          }
+        })
       } catch (parseError) {
         console.error("[Goals API] GET - Error parsing arrays:", parseError)
       }
@@ -99,11 +82,25 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       )
     }
-    
+
     const body = await request.json()
 
-    console.log("[Goals API] POST - Sending to:", `${API_URL}/goals`)
-    console.log("[Goals API] POST - Payload:", JSON.stringify(body, null, 2))
+    // Convert arrays to JSON strings
+    const processedBody = {
+      ...body,
+      goals_card_icon: Array.isArray(body.goals_card_icon)
+        ? JSON.stringify(body.goals_card_icon)
+        : body.goals_card_icon,
+      goals_card_title: Array.isArray(body.goals_card_title)
+        ? JSON.stringify(body.goals_card_title)
+        : body.goals_card_title,
+      goals_card_content: Array.isArray(body.goals_card_content)
+        ? JSON.stringify(body.goals_card_content)
+        : body.goals_card_content,
+      goals_card_list: Array.isArray(body.goals_card_list)
+        ? JSON.stringify(body.goals_card_list)
+        : body.goals_card_list,
+    }
 
     const response = await fetch(`${API_URL}/goals`, {
       method: "POST",
@@ -113,17 +110,14 @@ export async function POST(request: NextRequest) {
         Authorization: `Bearer ${token}`,
         "X-Requested-With": "XMLHttpRequest",
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(processedBody),
     })
 
     const responseText = await response.text()
-    console.log("[Goals API] POST - Status:", response.status)
-    console.log("[Goals API] POST - Response:", responseText.substring(0, 500))
 
     if (!response.ok) {
       try {
         const errorData = JSON.parse(responseText)
-        console.log("[Goals API] POST - Error data:", errorData)
         return NextResponse.json(
           {
             success: false,
@@ -133,13 +127,8 @@ export async function POST(request: NextRequest) {
           { status: response.status },
         )
       } catch {
-        console.log("[Goals API] POST - HTML error response")
         return NextResponse.json(
-          {
-            success: false,
-            error: "Server returned an error. Check Laravel logs for details.",
-            isHtmlError: responseText.includes("<html") || responseText.includes("<!DOCTYPE"),
-          },
+          { success: false, error: "Server error" },
           { status: response.status },
         )
       }
@@ -150,10 +139,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("[Goals API] POST - Error:", error)
     return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      },
+      { success: false, error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 },
     )
   }
@@ -172,23 +158,35 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json()
 
-    console.log("[Goals API] PUT - Sending to:", `${API_URL}/goals`)
-    console.log("[Goals API] PUT - Payload:", JSON.stringify(body, null, 2))
+    // Convert arrays to JSON strings
+    const processedBody = {
+      ...body,
+      goals_card_icon: Array.isArray(body.goals_card_icon)
+        ? JSON.stringify(body.goals_card_icon)
+        : body.goals_card_icon,
+      goals_card_title: Array.isArray(body.goals_card_title)
+        ? JSON.stringify(body.goals_card_title)
+        : body.goals_card_title,
+      goals_card_content: Array.isArray(body.goals_card_content)
+        ? JSON.stringify(body.goals_card_content)
+        : body.goals_card_content,
+      goals_card_list: Array.isArray(body.goals_card_list)
+        ? JSON.stringify(body.goals_card_list)
+        : body.goals_card_list,
+    }
 
     const response = await fetch(`${API_URL}/goals`, {
       method: "PUT",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // Added auth token
+        Authorization: `Bearer ${token}`,
         "X-Requested-With": "XMLHttpRequest",
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(processedBody),
     })
 
     const responseText = await response.text()
-    console.log("[Goals API] PUT - Status:", response.status)
-    console.log("[Goals API] PUT - Response:", responseText.substring(0, 500))
 
     if (!response.ok) {
       try {
@@ -203,11 +201,7 @@ export async function PUT(request: NextRequest) {
         )
       } catch {
         return NextResponse.json(
-          {
-            success: false,
-            error: "Server returned an error. Check Laravel logs for details.",
-            isHtmlError: responseText.includes("<html") || responseText.includes("<!DOCTYPE"),
-          },
+          { success: false, error: "Server error" },
           { status: response.status },
         )
       }
@@ -218,10 +212,7 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     console.error("[Goals API] PUT - Error:", error)
     return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      },
+      { success: false, error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 },
     )
   }
@@ -238,19 +229,16 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    console.log("[Goals API] DELETE - Sending to:", `${API_URL}/goals`)
-
     const response = await fetch(`${API_URL}/goals`, {
       method: "DELETE",
       headers: {
         Accept: "application/json",
-        Authorization: `Bearer ${token}`, // Added auth token
+        Authorization: `Bearer ${token}`,
         "X-Requested-With": "XMLHttpRequest",
       },
     })
 
     const responseText = await response.text()
-    console.log("[Goals API] DELETE - Status:", response.status)
 
     if (!response.ok) {
       try {
@@ -265,10 +253,7 @@ export async function DELETE(request: NextRequest) {
         )
       } catch {
         return NextResponse.json(
-          {
-            success: false,
-            error: "Server returned an error. Check Laravel logs for details.",
-          },
+          { success: false, error: "Server error" },
           { status: response.status },
         )
       }
@@ -279,10 +264,7 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     console.error("[Goals API] DELETE - Error:", error)
     return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      },
+      { success: false, error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 },
     )
   }

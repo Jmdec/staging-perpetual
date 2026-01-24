@@ -428,6 +428,84 @@ export default function AboutSection() {
           </motion.div>
         )}
 
+        {/* Mission & Vision Section */}
+        {missionVisionData && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mt-24 mb-24"
+          >
+            <div className="text-center mb-12">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                className="inline-block mb-4"
+              >
+                <span className="px-4 py-2 rounded-full bg-white/60 backdrop-blur-sm text-sm font-semibold bg-gradient-to-r from-green-600 via-red-600 to-[#800000]/90 bg-clip-text text-transparent">
+                  {missionVisionData.mission_and_vision_header}
+                </span>
+              </motion.div>
+
+              <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                <span className="bg-gradient-to-r from-yellow-600 via-red-600 to-red-900 bg-clip-text text-transparent">
+                  {missionVisionData.mission_and_vision_title}
+                </span>
+              </h2>
+
+              {missionVisionData.mission_and_vision_description && (
+                <p className="text-lg text-gray-700 max-w-3xl mx-auto">
+                  {missionVisionData.mission_and_vision_description}
+                </p>
+              )}
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+              {/* Mission Card */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+                whileHover={{ y: -8, scale: 1.02 }}
+                className="p-8 rounded-2xl bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all border border-orange-200/50 hover:border-orange-300"
+              >
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-yellow-400 via-red-600 to-[#800000]/90 flex items-center justify-center shadow-lg">
+                    <Target className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-yellow-600 via-red-600 to-red-900 bg-clip-text text-transparent">
+                    Mission
+                  </h3>
+                </div>
+                <p className="text-gray-700 leading-relaxed">
+                  {missionVisionData.mission_content}
+                </p>
+              </motion.div>
+
+              {/* Vision Card */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+                whileHover={{ y: -8, scale: 1.02 }}
+                className="p-8 rounded-2xl bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all border border-orange-200/50 hover:border-orange-300"
+              >
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-yellow-400 via-red-600 to-[#800000]/90 flex items-center justify-center shadow-lg">
+                    <Globe className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-yellow-600 via-red-600 to-red-900 bg-clip-text text-transparent">
+                    Vision
+                  </h3>
+                </div>
+                <p className="text-gray-700 leading-relaxed">
+                  {missionVisionData.vision_content}
+                </p>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+
         {/* Objectives Section */}
         {objectivesData && (
           <motion.div

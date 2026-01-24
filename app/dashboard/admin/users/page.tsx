@@ -150,56 +150,83 @@ export default function AdminUsersPage() {
     setIsConfirmModalOpen(true)
   }
 
-  const handleUpdateStatus = async () => {
-    if (!selectedUser || !actionType) return
+ const handleUpdateStatus = async () => {
+  if (!selectedUser || !actionType) return
 
-    try {
-      if ((actionType === "rejected" || actionType === "deactivated") && !rejectionReason.trim()) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: `${actionType === "rejected" ? "Rejection" : "Deactivation"} reason is required.`,
-        })
-        return
-      }
-
-      const response = await fetch(`/api/users/${selectedUser.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          status: actionType,
-          rejection_reason: actionType === "rejected" || actionType === "deactivated" ? rejectionReason : null,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        toast({
-          title: "Success",
-          description: `User ${actionType} successfully.`,
-        })
-        closeModal()
-        fetchUsers()
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: data.message || "Failed to update status.",
-        })
-      }
-    } catch (error) {
-      console.error("Error updating status:", error)
+  try {
+    if ((actionType === "rejected" || actionType === "deactivated") && !rejectionReason.trim()) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to update user status.",
+        description: `${actionType === "rejected" ? "Rejection" : "Deactivation"} reason is required.`,
       })
+      return
     }
+
+    const response = await fetch(`/api/users`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        userId: selectedUser.id,
+        status: actionType,
+        rejection_reason: actionType === "rejected" || actionType === "deactivated" ? rejectionReason : null,
+      }),
+    })
+
+    // Check if response has content
+    const contentType = response.headers.get('content-type')
+    let data
+
+    if (contentType && contentType.includes('application/json')) {
+      const text = await response.text()
+      
+      if (text && text.trim() !== '') {
+        try {
+          data = JSON.parse(text)
+        } catch (parseError) {
+          console.error('JSON parse error:', parseError)
+          console.error('Response text:', text)
+          throw new Error('Invalid response from server')
+        }
+      } else {
+        // Empty response but successful
+        if (response.ok) {
+          data = { success: true, message: 'Status updated successfully' }
+        } else {
+          throw new Error(`Server returned ${response.status} with empty response`)
+        }
+      }
+    } else {
+      // Not JSON response
+      const text = await response.text()
+      console.error('Non-JSON response:', text)
+      throw new Error('Server did not return JSON response')
+    }
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Failed to update status')
+    }
+
+    toast({
+      title: "Success",
+      description: data.message || `User ${actionType} successfully.`,
+    })
+    
+    closeModal()
+    fetchUsers()
+
+  } catch (error) {
+    console.error("Error updating status:", error)
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: error instanceof Error ? error.message : "Failed to update user status.",
+    })
   }
+}
 
   const handleSearch = () => {
     setPagination((prev) => ({ ...prev, current_page: 1 }))

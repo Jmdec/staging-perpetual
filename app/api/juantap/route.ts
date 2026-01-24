@@ -28,7 +28,7 @@ async function proxy(req: NextRequest, method: "GET" | "POST" | "PUT" | "DELETE"
   }
 
   try {
-    const res = await fetch(`${API_URL}/api/juantap`, options)
+    const res = await fetch(`${API_URL}/juantap`, options)
     const text = await res.text()
 
     let data
@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
   try {
     return await proxy(req, "GET")
   } catch (err) {
-    console.error("GET /api/juantap error:", err)
+    console.error("GET/juantap error:", err)
     return NextResponse.json(
       { message: "JuanTap proxy failed" },
       { status: 500 }
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
   try {
     return await proxy(req, "POST")
   } catch (err) {
-    console.error("POST /api/juantap error:", err)
+    console.error("POST/juantap error:", err)
     return NextResponse.json(
       { message: "JuanTap proxy failed" },
       { status: 500 }
@@ -80,7 +80,7 @@ export async function PUT(req: NextRequest) {
   try {
     return await proxy(req, "PUT")
   } catch (err) {
-    console.error("PUT /api/juantap error:", err)
+    console.error("PUT/juantap error:", err)
     return NextResponse.json(
       { message: "JuanTap proxy failed" },
       { status: 500 }
@@ -92,7 +92,7 @@ export async function DELETE(req: NextRequest) {
   try {
     return await proxy(req, "DELETE")
   } catch (err) {
-    console.error("DELETE /api/juantap error:", err)
+    console.error("DELETE/juantap error:", err)
     return NextResponse.json(
       { message: "JuanTap proxy failed" },
       { status: 500 }

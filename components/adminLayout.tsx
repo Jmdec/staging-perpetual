@@ -77,8 +77,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       {/* Sidebar - Desktop only */}
       <AdminSidebar
         isCollapsed={isSidebarCollapsed}
-        setIsCollapsed={setIsSidebarCollapsed}
-      />
+        setIsCollapsed={setIsSidebarCollapsed} isMobileOpen={false} setIsMobileOpen={function (v: boolean): void {
+          throw new Error('Function not implemented.');
+        } }      />
 
       {/* Main Content */}
       <div className={`pb-20 lg:pb-0 transition-all duration-300  ${isSidebarCollapsed ? "lg:ml-[70px]" : "lg:ml-[300px]"}  `}>

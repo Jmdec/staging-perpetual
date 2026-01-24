@@ -11,7 +11,7 @@ interface Vlog {
   description?: string
   content: string
   date: string
-  is_active: boolean | string | number // Allow multiple types from API
+  is_active: boolean | string | number
   video?: File | string
   poster?: File | string
 }
@@ -44,7 +44,6 @@ export default function AdminVlogsModal({ isOpen, mode, initialData, onClose, on
   const [progress, setProgress] = useState(0)
   const [poster, setPoster] = useState<File | null>(null)
 
-  // Helper function to normalize is_active value
   const normalizeIsActive = (value: boolean | string | number): boolean => {
     if (typeof value === "boolean") return value
     if (typeof value === "string") return value === "1" || value.toLowerCase() === "true"
@@ -66,106 +65,103 @@ export default function AdminVlogsModal({ isOpen, mode, initialData, onClose, on
       setPoster(null)
       setProgress(0)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, mode, initialData])
 
   if (!isOpen) return null
 
-  // Chunked upload function
-  const uploadChunks = async (file: File, form: Vlog, mode: "create" | "edit", id?: number) => {
+  // Fixed chunked upload - sends all chunks sequentially
+  const uploadChunks = async (file: File, formData: Vlog, mode: "create" | "edit", id?: number) => {
     const totalChunks = Math.ceil(file.size / CHUNK_SIZE)
+    console.log(`[Upload] Starting chunked upload: ${totalChunks} chunks, file size: ${file.size} bytes`)
 
     for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
       const start = chunkIndex * CHUNK_SIZE
       const end = Math.min(start + CHUNK_SIZE, file.size)
       const blobChunk = file.slice(start, end)
 
-      const formData = new FormData()
-      formData.append("chunk", blobChunk, file.name)
-      formData.append("chunk_index", String(chunkIndex))
-      formData.append("total_chunks", String(totalChunks))
-      formData.append("filename", file.name)
+      console.log(`[Upload] Chunk ${chunkIndex + 1}/${totalChunks}: ${start}-${end} bytes`)
 
-      // Only include metadata on first chunk
+      const formDataChunk = new FormData()
+      formDataChunk.append("chunk", blobChunk, file.name)
+      formDataChunk.append("chunk_index", String(chunkIndex))
+      formDataChunk.append("total_chunks", String(totalChunks))
+      formDataChunk.append("filename", file.name)
+
+      // Include metadata only on first chunk
       if (chunkIndex === 0) {
-        formData.append("title", form.title)
-        formData.append("category", form.category)
-        formData.append("date", form.date)
-        formData.append("content", form.content)
-        formData.append("is_active", normalizeIsActive(form.is_active) ? "1" : "0")
-        if (form.description) formData.append("description", form.description)
-        if (poster) {
-          formData.append("poster", poster)
-        }
+        formDataChunk.append("title", formData.title)
+        formDataChunk.append("category", formData.category)
+        formDataChunk.append("date", formData.date)
+        formDataChunk.append("content", formData.content)
+        formDataChunk.append("is_active", normalizeIsActive(formData.is_active) ? "1" : "0")
+        if (formData.description) formDataChunk.append("description", formData.description)
+        if (poster) formDataChunk.append("poster", poster)
       }
 
-      const url = mode === "create" ? `/api/admin/vlogs` : `/api/admin/vlogs/${id}`
-      const method = mode === "create" ? "POST" : "PUT"
+      // Determine API endpoint
+      const endpoint = mode === "create" 
+        ? "/api/admin/vlogs/chunk-upload"
+        : `/api/admin/vlogs/${id}/chunk-upload`
 
-      const xsrfCookie = document.cookie
-        .split("; ")
-        .find((c) => c.startsWith("XSRF-TOKEN="))
-        ?.split("=")[1]
-
-      const res = await fetch(url, {
-        method,
-        body: formData,
+      const res = await fetch(endpoint, {
+        method: "POST",
+        body: formDataChunk,
         credentials: "include",
-        headers: {
-          Accept: "application/json",
-          "X-XSRF-TOKEN": xsrfCookie ? decodeURIComponent(xsrfCookie) : "",
-        },
       })
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        throw new Error(data.message || "Upload failed")
+        const errorData = await res.json().catch(() => ({}))
+        console.error(`[Upload] Chunk ${chunkIndex + 1} failed:`, errorData)
+        throw new Error(errorData.message || `Chunk ${chunkIndex + 1} upload failed`)
       }
 
+      const responseData = await res.json()
+      console.log(`[Upload] Chunk ${chunkIndex + 1} response:`, responseData)
+
+      // Update progress
       setProgress(Math.round(((chunkIndex + 1) / totalChunks) * 100))
     }
+
+    console.log("[Upload] All chunks uploaded successfully")
   }
 
-  const updateMetadataOnly = async (form: Vlog, id: number) => {
-    const formData = new FormData()
-    formData.append("title", form.title)
-    formData.append("category", form.category)
-    formData.append("date", form.date)
-    formData.append("content", form.content)
-    formData.append("is_active", normalizeIsActive(form.is_active) ? "1" : "0")
-    if (form.description) formData.append("description", form.description)
-    if (poster) {
-      formData.append("poster", poster)
-    }
-    
-    const xsrfCookie = document.cookie
-      .split("; ")
-      .find((c) => c.startsWith("XSRF-TOKEN="))
-      ?.split("=")[1]
+  const updateMetadataOnly = async (formData: Vlog, id: number) => {
+    const data = new FormData()
+    data.append("title", formData.title)
+    data.append("category", formData.category)
+    data.append("date", formData.date)
+    data.append("content", formData.content)
+    data.append("is_active", normalizeIsActive(formData.is_active) ? "1" : "0")
+    if (formData.description) data.append("description", formData.description)
+    if (poster) data.append("poster", poster)
 
     const res = await fetch(`/api/admin/vlogs/${id}`, {
       method: "PUT",
-      body: formData,
+      body: data,
       credentials: "include",
-      headers: {
-        Accept: "application/json",
-        "X-XSRF-TOKEN": xsrfCookie ? decodeURIComponent(xsrfCookie) : "",
-      },
     })
 
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}))
-      throw new Error(data.message || "Update failed")
+      const errorData = await res.json().catch(() => ({}))
+      throw new Error(errorData.message || "Update failed")
     }
   }
 
-  // Handle Submit
   const handleSubmit = async () => {
     if (mode === "create" && !video) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "No video selected",
+        description: "Please select a video file",
+      })
+      return
+    }
+
+    if (!form.title || !form.category || !form.date || !form.content) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please fill in all required fields",
       })
       return
     }
@@ -178,24 +174,27 @@ export default function AdminVlogsModal({ isOpen, mode, initialData, onClose, on
         await uploadChunks(video as File, form, "create")
       } else if (mode === "edit" && initialData?.id) {
         if (video) {
+          // Uploading new video
           await uploadChunks(video, form, "edit", initialData.id)
         } else {
+          // Only updating metadata
           await updateMetadataOnly(form, initialData.id)
         }
       }
 
       toast({
-        title: "Success",
+        title: "✓ Success",
         description: `Vlog ${mode === "create" ? "created" : "updated"} successfully`,
+        className: "bg-green-50 border-green-200",
       })
 
       onSubmitSuccess()
       onClose()
     } catch (err: any) {
-      console.error(err)
+      console.error("[Submit Error]", err)
       toast({
         variant: "destructive",
-        title: "Save failed",
+        title: "Failed",
         description: err.message || "Something went wrong",
       })
     } finally {
@@ -204,110 +203,116 @@ export default function AdminVlogsModal({ isOpen, mode, initialData, onClose, on
     }
   }
 
-  const getVideoUrl = (videoUrl?: string): string => {
-    if (!videoUrl) return "/placeholder.png"
-    if (videoUrl.startsWith("http://") || videoUrl.startsWith("https://")) {
-      return videoUrl
+  const getMediaUrl = (mediaUrl?: string): string => {
+    if (!mediaUrl) return "/placeholder.png"
+    if (mediaUrl.startsWith("http://") || mediaUrl.startsWith("https://")) {
+      return mediaUrl
     }
-    if (videoUrl.startsWith("/")) {
-      return `${process.env.NEXT_PUBLIC_IMAGE_URL}${videoUrl}`
+    if (mediaUrl.startsWith("/")) {
+      return `${process.env.NEXT_PUBLIC_IMAGE_URL}${mediaUrl}`
     }
-    return `${process.env.NEXT_PUBLIC_IMAGE_URL}/${videoUrl}`
+    return `${process.env.NEXT_PUBLIC_IMAGE_URL}/${mediaUrl}`
   }
-
-  console.log("Initial video:", initialData)
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 sm:p-6">
-      <div
-        className="bg-white rounded-lg w-full max-w-lg sm:max-w-xl md:max-w-2xl lg:max-w-3xl 
-                  p-4 sm:p-6 relative overflow-y-auto max-h-[90vh]"
-      >
-        {/* Close button */}
+      <div className="bg-white rounded-lg w-full max-w-lg sm:max-w-xl md:max-w-2xl lg:max-w-3xl p-4 sm:p-6 relative overflow-y-auto max-h-[90vh]">
         <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-gray-600">
           <X />
         </button>
 
-        {/* Title */}
-        <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-4">{mode === "create" ? "Add Vlog" : "Edit Vlog"}</h2>
+        <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-4">
+          {mode === "create" ? "Add Vlog" : "Edit Vlog"}
+        </h2>
 
-        {/* Form fields */}
         <div className="space-y-4">
           <input
             className="w-full border rounded-lg px-3 py-2 text-sm sm:text-base"
-            placeholder="Title"
+            placeholder="Title *"
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
           />
+          
           <input
             className="w-full border rounded-lg px-3 py-2 text-sm sm:text-base"
-            placeholder="Category"
+            placeholder="Category *"
             value={form.category}
             onChange={(e) => setForm({ ...form, category: e.target.value })}
           />
+          
           <input
             type="date"
             className="w-full border rounded-lg px-3 py-2 text-sm sm:text-base"
             value={form.date}
             onChange={(e) => setForm({ ...form, date: e.target.value })}
           />
+          
           <textarea
             className="w-full border rounded-lg px-3 py-2 text-sm sm:text-base"
             placeholder="Short description"
+            rows={2}
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
+          
           <textarea
             className="w-full border rounded-lg px-3 py-2 text-sm sm:text-base"
-            placeholder="Content (required)"
+            placeholder="Content (required) *"
             rows={4}
             value={form.content}
             onChange={(e) => setForm({ ...form, content: e.target.value })}
           />
 
-          {/* Poster upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Poster Image</label>
             <input
               type="file"
-              accept="image/png,image/jpeg,image/webp"
+              accept="image/png,image/jpeg,image/webp,image/jpg"
               onChange={(e) => setPoster(e.target.files?.[0] || null)}
-              className="text-sm sm:text-base"
+              className="text-sm sm:text-base w-full"
             />
             {mode === "edit" && initialData?.poster && !poster && (
               <div className="mt-2">
-                <p className="text-sm text-gray-600">Current poster:</p>
-                <img 
-                  src={getVideoUrl(typeof initialData.poster === 'string' ? initialData.poster : '')} 
-                  alt="Poster" 
-                  className="w-full max-h-48 rounded-lg border object-cover mt-1" 
+                <p className="text-xs text-gray-500">Current poster:</p>
+                <img
+                  src={getMediaUrl(typeof initialData.poster === "string" ? initialData.poster : "")}
+                  alt="Current poster"
+                  className="w-full max-h-48 rounded-lg border object-cover mt-1"
                 />
               </div>
             )}
+            {poster && (
+              <p className="text-xs text-green-600 mt-1">New poster selected: {poster.name}</p>
+            )}
           </div>
 
-          {/* Video upload */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Video File</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Video File {mode === "create" && "*"}
+            </label>
             <input
               type="file"
               accept="video/mp4,video/mov,video/avi,video/webm"
               onChange={(e) => setVideo(e.target.files?.[0] || null)}
-              className="text-sm sm:text-base"
+              className="text-sm sm:text-base w-full"
             />
+            {video && (
+              <p className="text-xs text-blue-600 mt-1">
+                Selected: {video.name} ({(video.size / (1024 * 1024)).toFixed(2)} MB)
+              </p>
+            )}
             {mode === "edit" && initialData?.video && !video && (
               <div className="mt-2">
-                <p className="text-sm text-gray-600">Current video:</p>
-                <video 
-                  src={getVideoUrl(typeof initialData.video === 'string' ? initialData.video : '')} 
-                  controls 
-                  className="w-full max-h-64 rounded-lg border mt-1" 
+                <p className="text-xs text-gray-500">Current video:</p>
+                <video
+                  src={getMediaUrl(typeof initialData.video === "string" ? initialData.video : "")}
+                  controls
+                  className="w-full max-h-64 rounded-lg border mt-1"
                 />
               </div>
             )}
           </div>
 
-          {/* Status */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
             <select
@@ -321,9 +326,24 @@ export default function AdminVlogsModal({ isOpen, mode, initialData, onClose, on
           </div>
         </div>
 
-        {/* Actions */}
+        {loading && (
+          <div className="mt-4">
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-orange-600 h-2 rounded-full transition-all"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <p className="text-sm text-center mt-1 text-gray-600">Uploading... {progress}%</p>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
-          <button onClick={onClose} className="px-4 py-2 border rounded-lg text-sm sm:text-base">
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="px-4 py-2 border rounded-lg text-sm sm:text-base hover:bg-gray-50 disabled:opacity-50"
+          >
             Cancel
           </button>
           <button

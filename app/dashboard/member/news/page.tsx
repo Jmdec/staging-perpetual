@@ -1,10 +1,7 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronLeft, Calendar, Eye, Share2, Bookmark, Newspaper } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
+import { Calendar, Eye, Share2, Bookmark, Newspaper } from "lucide-react"
 import MemberLayout from "@/components/memberLayout"
 import { ArticleModal } from "@/components/member/article-modal"
 
@@ -38,7 +35,9 @@ const normalizeApiList = (res: any): ApiNewsArticle[] =>
 const getImageUrl = (path?: string | null) => {
   if (!path) return undefined
   if (path.startsWith("http")) return path
-  return `${API_BASE}${path.startsWith("/") ? "" : "/"}${path}`
+  // Remove leading slash if present to avoid double slashes
+  const cleanPath = path.startsWith("/") ? path : `/${path}`
+  return `${API_BASE}${cleanPath}`
 }
 
 const transformArticle = (article: ApiNewsArticle): NewsArticle => ({
@@ -72,7 +71,10 @@ export default function NewsPage() {
         const res = await fetch("/api/news/published?per_page=50")
         const json = await res.json()
 
-        setNews(normalizeApiList(json).map(transformArticle))
+        console.log("News API response:", json)
+        const articles = normalizeApiList(json).map(transformArticle)
+        console.log("Transformed articles:", articles)
+        setNews(articles)
       } catch (err) {
         console.error("Error fetching news:", err)
       } finally {
@@ -87,7 +89,7 @@ export default function NewsPage() {
     <MemberLayout>
       <div className="h-screen bg-gray-50">
         {/* HEADER */}
-        <header className="bg-linear-to-r from-orange-600 to-orange-500 text-white px-4 sm:px-6 py-3 sm:py-4 sticky top-0 z-10 shadow-md">
+        <header className="bg-gradient-to-r from-orange-600 to-orange-500 text-white px-4 sm:px-6 py-3 sm:py-4 sticky top-0 z-10 shadow-md">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div>
@@ -110,10 +112,14 @@ export default function NewsPage() {
         {/* CONTENT */}
         <main className="px-4 sm:px-6 py-6 max-w-7xl mx-auto">
           {loading ? (
-            <div className="text-center py-12">Loading news…</div>
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading news…</p>
+            </div>
           ) : news.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
-              No news articles available
+              <Newspaper className="w-16 h-16 mx-auto mb-4 opacity-50" />
+              <p>No news articles available</p>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -124,16 +130,25 @@ export default function NewsPage() {
                     setSelectedArticle(article)
                     setModalOpen(true)
                   }}
-                  className="group bg-white rounded-xl overflow-hidden border shadow-sm hover:shadow-lg cursor-pointer"
+                  className="group bg-white rounded-xl overflow-hidden border shadow-sm hover:shadow-lg cursor-pointer transition-all"
                 >
-                  {article.image && (
-                    <div className="relative aspect-video">
-                      <Image
+                  {article.image ? (
+                    <div className="relative aspect-video bg-gray-100">
+                      {/* Use regular img tag instead of Next.js Image */}
+                      <img
                         src={article.image}
                         alt={article.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          console.error("Image load error:", article.image)
+                          // Hide image on error
+                          e.currentTarget.style.display = 'none'
+                        }}
                       />
+                    </div>
+                  ) : (
+                    <div className="relative aspect-video bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center">
+                      <Newspaper className="w-16 h-16 text-orange-400 opacity-50" />
                     </div>
                   )}
 
@@ -143,7 +158,7 @@ export default function NewsPage() {
                       {article.publishedAt}
                     </div>
 
-                    <h3 className="font-bold text-lg mb-2 line-clamp-2">
+                    <h3 className="font-bold text-lg mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors">
                       {article.title}
                     </h3>
 
@@ -154,9 +169,9 @@ export default function NewsPage() {
                     <div className="flex justify-between items-center text-xs text-gray-500 mt-4">
                       <span>By {article.author}</span>
                       <div className="flex gap-3">
-                        <Eye className="w-4 h-4" />
-                        <Share2 className="w-4 h-4" />
-                        <Bookmark className="w-4 h-4" />
+                        <Eye className="w-4 h-4 hover:text-orange-600 transition-colors" />
+                        <Share2 className="w-4 h-4 hover:text-orange-600 transition-colors" />
+                        <Bookmark className="w-4 h-4 hover:text-orange-600 transition-colors" />
                       </div>
                     </div>
                   </div>
